@@ -5,7 +5,7 @@ set -exu
 output_dir=${1:-"exp_out"}
 run_id=${2:-1}
 
-dataset_file=$GRINCH_ROOT/data/synth-25-100-100-0.1-True.tsv.1
+dataset_file=$GRINCH_ROOT/data/synth-25-100-100-0.1-True.tsv
 dataset_name=synth-25-100-100-0.1-True
 
 num_runs=1
