@@ -643,11 +643,6 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
             self.needs_update_model[i] = True
         self.points_set = False
 
-    @staticmethod
-    def load(filename):
-        with open(filename, 'rb') as fout:
-            grinch = pickle.load(fout)
-
     def build_dendrogram_hac(self):
         from scipy.cluster.hierarchy import linkage
         from scipy.spatial.distance import squareform
