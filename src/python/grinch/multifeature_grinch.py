@@ -128,7 +128,7 @@ class MultiFeatureGrinch(Grinch):
         :param i:
         :return:
         """
-        import pdb;pdb.set_trace()
+        self.init_features()
         logging.log_every_n(logging.INFO, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
             logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
