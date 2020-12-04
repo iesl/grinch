@@ -146,7 +146,7 @@ class MultiFeatureGrinch(Grinch):
         self.new_node[i] = np.zeros_like(i, dtype=np.bool_)
         self.points_set = True
 
-    def from_scipy_z(self, Z):
+    def from_scipy_z(self, Z, update=False):
         logging.info('running from_scipy_z')
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
@@ -165,8 +165,9 @@ class MultiFeatureGrinch(Grinch):
         self.descendants[0:self.num_points] = [[x] for x in range(self.num_points)]
         self.num_descendants[0:self.num_points] = [1 for x in range(self.num_points)]
 
-        self.update_desc(self.root())
-        self.update(self.root())
+        if update:
+            self.update_desc(self.root())
+            self.update(self.root())
         self.next_node_id = self.num_points * 2
 
     def init_dense_feature(self, dim):
