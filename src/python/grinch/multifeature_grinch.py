@@ -130,11 +130,11 @@ class MultiFeatureGrinch(Grinch):
         """
         logging.log_every_n(logging.INFO, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
-            # logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat
             self.dense_centroids[idx][i] = mat
         for idx, mat in enumerate(self.sparse_point_features):
-            # logging.log_every_n(logging.INFO, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            logging.log_every_n(logging.INFO, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             for ii in i:
                 self.sparse_sums[idx][ii] = mat[ii]
                 self.sparse_centroids[idx][ii] = mat[ii]
