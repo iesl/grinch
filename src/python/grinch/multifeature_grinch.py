@@ -141,7 +141,8 @@ class MultiFeatureGrinch(Grinch):
         self.num_descendants[i] = np.ones_like(i)
         self.point_counter += len(i)
         for ii in i:
-            self.descendants[ii].append(ii)
+            self.descendants[ii] = [ii]
+            # self.descendants[ii].append(ii)
         # self.compute_centroid(i, False)
         self.new_node[i] = np.zeros_like(i, dtype=np.bool_)
         self.points_set = True
@@ -302,6 +303,9 @@ class MultiFeatureGrinch(Grinch):
         self.needs_update_model[i] = False
 
     def insert(self, i):
+        if self.points_set is False:
+            logging.info('grinch points not set, setting now for all points.....')
+            self.set_points(np.arange(self.num_points))
         s = time.time()
         logging.debug('[insert] insert(%s)', i)
         # first point
@@ -621,15 +625,23 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         # Set tree structure
         grinch = WeightedMultiFeatureGrinch(agglom.model, agglom.features, agglom.num_points)
         grinch.from_scipy_z(agglom.Z)
+        return grinch
 
     def save_and_quit(self, filename):
         # remove features
         # unset leaf features
-        self.clear_node_features()
-        self.points_set = False
+        self.prepare_for_save()
         # save tree structure
         with open(filename, 'wb') as fout:
             pickle.dump(self, fout)
+
+    def prepare_for_save(self):
+        self.clear_node_features()
+        for i in self.all_valid_internal_nodes():
+            self.descendants[i] = []
+            self.needs_update_desc[i] = True
+            self.needs_update_model[i] = True
+        self.points_set = False
 
     @staticmethod
     def load(filename):
