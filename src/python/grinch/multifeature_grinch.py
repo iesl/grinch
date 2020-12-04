@@ -17,7 +17,7 @@ logging.set_verbosity(logging.INFO)
 class MultiFeatureGrinch(Grinch):
 
     def __init__(self, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='l2', sim='dot',
-                 max_nodes=1000000):
+                 max_nodes=None):
         """
 
         :param features: (fn, is_dense, dim, feat_mat)
@@ -608,7 +608,7 @@ class MultiFeatureGrinch(Grinch):
 class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
 
     def __init__(self, model, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='none', sim='dot',
-                 max_nodes=10000):
+                 max_nodes=None):
         super(WeightedMultiFeatureGrinch, self).__init__(features, num_points,
                                                          dim=dim, rotate_cap=rotate_cap,
                                                          graft_cap=graft_cap, norm=norm, sim=sim, max_nodes=max_nodes)

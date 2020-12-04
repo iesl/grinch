@@ -14,7 +14,10 @@ class Grinch(object):
     def __init__(self, points=None, num_points=None, dim=None, init_points=False, rotate_cap=100, graft_cap=100, norm='l2', sim='dot', max_nodes=1000000):
 
         self.point_counter = 0
-        self.max_nodes = max_nodes
+        if max_nodes is not None:
+            self.max_nodes = max_nodes
+        else:
+            self.max_nodes = num_points*3
         self.norm = norm
 
         if points is not None:
