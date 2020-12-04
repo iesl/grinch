@@ -63,6 +63,7 @@ class MultiFeatureGrinch(Grinch):
         self.compute_centroid = self.compute_centroid_multi_feature
         self.points_set = False
 
+
     def clear_node_features(self):
         self.dense_centroids = [[] for _ in range(len(self.dense_feature_id))]
         self.dense_sums = [[] for _ in range(len(self.dense_feature_id))]
@@ -71,9 +72,15 @@ class MultiFeatureGrinch(Grinch):
         self.sparse_sums = [[] for _ in range(len(self.sparse_feature_id))]
 
     def update_and_insert(self, i_features):
+        if self.points_set is False:
+            logging.info('grinch points not set, setting now for all points.....')
+            self.set_points(np.arange(self.num_points))
+        logging.info('max_nodes %s | current num_points %s', self.max_nodes, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
+        logging.info('max_nodes %s | current num_points %s | adding %s', self.max_nodes, self.num_points, num_points)
         for i in range(prev_num_points, prev_num_points + num_points):
             self.insert(i)
+            self.num_points += 1
 
     def update_features(self, i_features):
         logging.info('updating %s features', len(i_features))
