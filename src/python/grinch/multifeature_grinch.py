@@ -649,7 +649,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         st_add = time.time()
         # for i in range(self.num_points):
         #     self.add_pt(i)
-        self.set_points(np.arange(0, self.num_points))
+        self.set_points([x for x in range(0, self.num_points)])
         en_add = time.time()
         logging.info('Time to add points: %s', en_add - st_add)
         st_sims = time.time()
