@@ -72,7 +72,7 @@ class MultiFeatureGrinch(Grinch):
         self.sparse_sums = [[] for _ in range(len(self.sparse_feature_id))]
 
     def update_and_insert(self, i_features):
-        
+
         logging.info('max_nodes %s | current num_points %s', self.max_nodes, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
 
@@ -154,8 +154,8 @@ class MultiFeatureGrinch(Grinch):
         logging.log_every_n(logging.INFO, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
             logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
-            self.dense_sums[idx][i] = mat
-            self.dense_centroids[idx][i] = mat
+            self.dense_sums[idx][i] = mat[i]
+            self.dense_centroids[idx][i] = mat[i]
         for idx, mat in enumerate(self.sparse_point_features):
             logging.log_every_n(logging.INFO, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             for ii in i:
