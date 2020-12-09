@@ -75,6 +75,13 @@ class MultiFeatureGrinch(Grinch):
         if self.points_set is False:
             logging.info('grinch points not set, setting now for all points.....')
             self.set_points(np.arange(self.num_points))
+
+        for idx in range(len(self.dense_point_features)):
+            logging.info('dense_point_features %s', str(self.dense_point_features[idx].shape))
+
+        for idx in range(len(self.sparse_point_features)):
+            logging.info('sparse_point_features %s', str(self.sparse_point_features[idx].shape))
+
         logging.info('max_nodes %s | current num_points %s', self.max_nodes, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
         logging.info('max_nodes %s | current num_points %s | adding %s', self.max_nodes, self.num_points, num_points)
