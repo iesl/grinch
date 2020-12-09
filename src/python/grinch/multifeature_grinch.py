@@ -104,24 +104,26 @@ class MultiFeatureGrinch(Grinch):
         logging.info('%s dense features', len(dense_features))
         logging.info('%s sparse features', len(sparse_features))
 
-        dense_point_features = []
         sparse_point_features = []
         dense_feature_id = dict()
-        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(dense_features):
             dense_feature_id[fn] = idx
-            dense_point_features.append(feat_mat)
             num_points = feat_mat.shape[0]
             prev_num_points = self.dense_point_features[idx].shape[0]
-            dense_point_features[idx] = np.vstack([dense_point_features[idx], feat_mat])
+            logging.info('[old] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
+            self.dense_point_features[idx] = np.vstack([self.dense_point_features[idx], feat_mat])
+            logging.info('[new] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
 
         sparse_feature_id = dict()
-        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(sparse_features):
             sparse_feature_id[fn] = idx
-            # analyze_sparsity(feat_mat, fn)
-            sparse_point_features.append(feat_mat)
             num_points = feat_mat.shape[0]
             prev_num_points = self.sparse_point_features[idx].shape[0]
-            sparse_point_features[idx] = scipy.sparse.vstack([sparse_point_features[idx], feat_mat])
+            logging.info('[old] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
+            self.sparse_point_features[idx] = scipy.sparse.vstack([self.sparse_point_features[idx], feat_mat])
+            logging.info('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
+
+        self.sparse_point_features = sparse_point_features
         return num_points, prev_num_points
 
     def add_pt(self, i):
