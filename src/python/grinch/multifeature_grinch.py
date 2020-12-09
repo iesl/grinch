@@ -106,7 +106,6 @@ class MultiFeatureGrinch(Grinch):
         logging.info('%s dense features', len(dense_features))
         logging.info('%s sparse features', len(sparse_features))
 
-        sparse_point_features = []
         dense_feature_id = dict()
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(dense_features):
             dense_feature_id[fn] = idx
@@ -125,7 +124,6 @@ class MultiFeatureGrinch(Grinch):
             self.sparse_point_features[idx] = scipy.sparse.vstack([self.sparse_point_features[idx], feat_mat])
             logging.info('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
 
-        self.sparse_point_features = sparse_point_features
         return num_points, prev_num_points
 
     def add_pt(self, i):
@@ -330,7 +328,7 @@ class MultiFeatureGrinch(Grinch):
             logging.info('grinch points not set, setting now for all points.....')
             self.set_points(np.arange(self.num_points))
         s = time.time()
-        logging.debug('[insert] insert(%s)', i)
+        logging.debug('[insert] insert(%s) pc=%s', i, self.point_counter)
         # first point
         if self.point_counter == 0:
             self.add_pt(i)
