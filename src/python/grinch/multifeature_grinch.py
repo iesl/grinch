@@ -78,9 +78,13 @@ class MultiFeatureGrinch(Grinch):
 
         for idx in range(len(self.dense_point_features)):
             logging.info('dense_point_features %s', str(self.dense_point_features[idx].shape))
+            logging.info('dense_sums %s', str(self.dense_sums[idx].shape))
+            logging.info('dense_centroids %s', str(self.dense_centroids[idx].shape))
 
         for idx in range(len(self.sparse_point_features)):
             logging.info('sparse_point_features %s', str(self.sparse_point_features[idx].shape))
+            logging.info('sparse_sums %s', str(len(self.sparse_sums[idx])))
+            logging.info('sparse_centroids %s', str(len(self.sparse_centroids[idx])))
 
         logging.info('max_nodes %s | current num_points %s', self.max_nodes, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
