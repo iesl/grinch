@@ -338,6 +338,7 @@ class MultiFeatureGrinch(Grinch):
         assert self.needs_update_model[i]
         kids = self.get_children(i)
         s = time.time()
+        assert len(kids) == 2, 'node %s has kids %s (needed 2 children!)' % (i, str(kids))
         self.num_descendants[i] = self.num_descendants[kids[0]] + self.num_descendants[kids[1]]
         self.compute_centroid_multi_feature(i, update_sums=True)
         self.time_in_centroid += time.time() - s
