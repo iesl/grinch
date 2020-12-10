@@ -112,7 +112,7 @@ class MultiFeatureGrinch(Grinch):
             num_points = feat_mat.shape[0]
             prev_num_points = self.dense_point_features[idx].shape[0]
             logging.info('[old] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
-            logging.info('[old] feat_mat.shape = %s', idx, str(feat_mat.shape))
+            logging.info('[old] feat_mat.shape = %s', str(feat_mat.shape))
             self.dense_point_features[idx] = np.vstack([self.dense_point_features[idx], feat_mat])
             logging.info('[new] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
 
@@ -122,7 +122,7 @@ class MultiFeatureGrinch(Grinch):
             num_points = feat_mat.shape[0]
             prev_num_points = self.sparse_point_features[idx].shape[0]
             logging.info('[old] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
-            logging.info('[old] feat_mat.shape = %s', idx, str(feat_mat.shape))
+            logging.info('[old] feat_mat.shape = %s', str(feat_mat.shape))
             self.sparse_point_features[idx] = scipy.sparse.vstack([self.sparse_point_features[idx], feat_mat])
             logging.info('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
 
@@ -220,7 +220,7 @@ class MultiFeatureGrinch(Grinch):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
             logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
-            self.dense_feature_id[fn] = idx
+            self.sparse_feature_id[fn] = idx
             c, s = self.init_sparse_feature(dim)
             self.sparse_centroids[idx] = s
             self.sparse_sums[idx] = c
