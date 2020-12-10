@@ -525,7 +525,7 @@ class MultiFeatureGrinch(Grinch):
         s = np.zeros((len_i, len_j), dtype=np.float32)
         for idx in range(len(self.dense_centroids)):
             t = time.time()
-            feat_score = self.dense_centroids[idx][i] @ self.dense_features[idx][3][j].T
+            feat_score = self.dense_centroids[idx][i] @ self.dense_point_features[idx][j].T
             s += feat_score
             total_time = time.time() - t
             # wandb.log({'time/%s_csim' % self.dense_features[idx][0]: total_time, 'point_counter': self.point_counter})
@@ -793,7 +793,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
             logging.log_first_n(logging.INFO, 'idx=%s', 10, idx)
             logging.log_first_n(logging.INFO, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
             w, b = self.model.weight_for(self.dense_features[idx][0])
-            rhs = self.dense_features[idx][3][j]  # Grab the original feature matrix for j
+            rhs = self.dense_point_features[idx][j]  # Grab the original feature matrix for j
             if self.dense_features[idx][4] == FeatCalc.L2:
                 feat_score = w * self.c_l2dist_feature_dense_knn(idx, i, rhs)
             elif self.dense_features[idx][4] == FeatCalc.DOT:
