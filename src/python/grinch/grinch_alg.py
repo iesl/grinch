@@ -614,7 +614,9 @@ class Grinch(object):
         return self.scores[i]
 
     def make_sibling(self, node, new_sib, parent):
+        logging.debug('make_sibling(node=%s, new_sib=%s, parent=%s)', node, new_sib, parent)
         sib_parent = self.get_parent(new_sib)
+        logging.debug('make_sibling(node=%s, new_sib=%s, parent=%s) sib_parent=%s', node, new_sib, parent, sib_parent)
         if sib_parent != -1:
             sib_gp = self.get_parent(sib_parent)
             old_sib = self.get_sibling(new_sib)
@@ -625,7 +627,7 @@ class Grinch(object):
             self.clear_children(sib_parent)
             self.parent[sib_parent] = -2 # Code for deletion
         else:
-            assert self.is_leaf(new_sib)
+            assert self.is_leaf(new_sib), 'self.is_leaf(new_sib=%s)=%s' % (new_sib, self.is_leaf(new_sib))
 
         self.set_parent(parent, self.get_parent(node))
         parentparent = self.get_parent(parent)
