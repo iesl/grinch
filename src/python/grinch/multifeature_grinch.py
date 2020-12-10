@@ -544,7 +544,7 @@ class MultiFeatureGrinch(Grinch):
             # pdb.set_trace()
             lhs = scipy.sparse.vstack([self.sparse_centroids[idx][ii] for ii in i]) if len(i) > 0 else \
                 self.sparse_centroids[idx][i[0]]
-            rhs = self.sparse_features[idx][3][j].T
+            rhs = self.sparse_point_features[idx][j].T
             feat_score = (lhs @ rhs).todense().A
             # feat_score = (self.sparse_centroids[idx][i] @ self.sparse_centroids[idx][j].T).todense().A
             s += feat_score
@@ -816,7 +816,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
             s += feat_score
         for idx in range(len(self.sparse_features)):
             w, b = self.model.weight_for(self.sparse_features[idx][0])
-            rhs = self.sparse_features[idx][3][j]  # Grab the original feature matrix for j
+            rhs = self.sparse_point_features[idx][j]  # Grab the original feature matrix for j
             if self.sparse_features[idx][4] == FeatCalc.L2:
                 feat_score = w * self.c_l2dist_feature_sparse_knn(idx, i, rhs)
             elif self.sparse_features[idx][4] == FeatCalc.DOT:
