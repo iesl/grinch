@@ -191,13 +191,19 @@ class MultiFeatureGrinch(Grinch):
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
         id_map = dict()
+        self.next_node_id = self.max_num_points * 2
+        self.point_counter = self.num_points-1
+
         def get_id(scipy_id):
             if scipy_id < self.num_points:
+                logging.log_first_n(logging.INFO, 'scipy_id %s in id_map', 10, scipy_id)
                 return scipy_id
             else:
                 if scipy_id not in id_map:
                     id_map[scipy_id] = self.next_node_id
                     self.next_node_id += 1
+                    logging.log_first_n(logging.INFO, 'scipy_id %s not in id_map, id_map[scipy_id]=%s, self.next_node_id', 10, scipy_id, id_map[scipy_id], self.next_node_id)
+
                 return id_map[scipy_id]
         for i in range(Z.shape[0]):
             if should_log:
@@ -217,8 +223,7 @@ class MultiFeatureGrinch(Grinch):
         if update:
             self.update_desc(self.root())
             self.update(self.root())
-        self.next_node_id = self.max_num_points * 2
-        self.point_counter = self.num_points-1
+
 
     def init_dense_feature(self, dim):
         return np.zeros((self.max_nodes, dim), dtype=np.float32), np.zeros((self.max_nodes, dim), dtype=np.float32)
