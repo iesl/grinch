@@ -35,26 +35,26 @@ class Grinch(object):
             self.num_points = num_points
         if dim is not None or points is not None:
             self.dim = dim if dim is not None else self.points.shape[1]
-            self.centroids = np.zeros((self.max_num_points, self.dim), dtype=np.float32)
-            self.radii = np.ones((self.max_num_points, 1), dtype=np.float32)
-            self.sums = np.zeros((self.max_num_points, self.dim), dtype=np.float32)
+            self.centroids = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
+            self.radii = np.ones((self.max_nodes, 1), dtype=np.float32)
+            self.sums = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
 
         if init_points:
             self.points = np.zeros((self.num_points, self.dim), np.float32)
             logging.info('[Grinch] points %s', str(self.points.shape))
 
-        self.ancs = [[] for _ in range(self.max_num_points)]
-        self.notes = [None for _ in range(self.max_num_points)]
+        self.ancs = [[] for _ in range(self.max_nodes)]
+        self.notes = [None for _ in range(self.max_nodes)]
         self.sibs = None
-        self.children = [[] for _ in range(self.max_num_points)]
-        self.descendants = [[] for _ in range(self.max_num_points)]
-        self.scores = -np.inf*np.ones(self.max_num_points, dtype=np.float32)
-        self.needs_update_model = np.zeros(self.max_num_points, dtype=np.bool_)
-        self.new_node = np.ones(self.max_num_points, dtype=np.bool_)
-        self.needs_update_desc = np.zeros(self.max_num_points, dtype=np.bool_)
-        self.parent = -1*np.ones(self.max_num_points, dtype=np.int32)
+        self.children = [[] for _ in range(self.max_nodes)]
+        self.descendants = [[] for _ in range(self.max_nodes)]
+        self.scores = -np.inf*np.ones(self.max_nodes, dtype=np.float32)
+        self.needs_update_model = np.zeros(self.max_nodes, dtype=np.bool_)
+        self.new_node = np.ones(self.max_nodes, dtype=np.bool_)
+        self.needs_update_desc = np.zeros(self.max_nodes, dtype=np.bool_)
+        self.parent = -1*np.ones(self.max_nodes, dtype=np.int32)
         self.next_node_id = self.num_points
-        self.num_descendants = -1 * np.ones(self.max_num_points, dtype=np.float32)
+        self.num_descendants = -1 * np.ones(self.max_nodes, dtype=np.float32)
         self.rotate_cap = rotate_cap
         self.graft_cap = graft_cap
 
