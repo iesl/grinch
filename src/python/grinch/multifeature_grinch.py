@@ -17,7 +17,7 @@ logging.set_verbosity(logging.INFO)
 class MultiFeatureGrinch(Grinch):
 
     def __init__(self, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='l2', sim='dot',
-                 max_nodes=None):
+                 max_num_points=None):
         """
 
         :param features: (fn, is_dense, dim, feat_mat)
@@ -28,7 +28,7 @@ class MultiFeatureGrinch(Grinch):
         :param sim:
         """
         super(MultiFeatureGrinch, self).__init__(num_points=num_points, dim=dim, rotate_cap=rotate_cap,
-                                                 graft_cap=graft_cap, norm=norm, sim=sim, max_nodes=max_nodes)
+                                                 graft_cap=graft_cap, norm=norm, sim=sim, max_num_points=max_num_points)
 
         self.features = features
 
@@ -73,7 +73,7 @@ class MultiFeatureGrinch(Grinch):
 
     def update_and_insert(self, i_features):
 
-        logging.info('max_nodes %s | current num_points %s', self.max_nodes, self.num_points)
+        logging.info('max_num_points %s | current num_points %s', self.max_num_points, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
 
         if self.points_set is False:
@@ -90,7 +90,7 @@ class MultiFeatureGrinch(Grinch):
             logging.info('sparse_sums %s', str(len(self.sparse_sums[idx])))
             logging.info('sparse_centroids %s', str(len(self.sparse_centroids[idx])))
 
-        logging.info('max_nodes %s | current num_points %s | adding %s', self.max_nodes, self.num_points, num_points)
+        logging.info('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points, num_points)
         for i in range(prev_num_points, prev_num_points + num_points):
             self.insert(i)
             self.num_points += 1
@@ -174,13 +174,22 @@ class MultiFeatureGrinch(Grinch):
         logging.info('running from_scipy_z')
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
+        id_map = dict()
+        def get_id(scipy_id):
+            if scipy_id < self.num_points:
+                return scipy_id
+            else:
+                if scipy_id not in id_map:
+                    id_map[scipy_id] = self.next_node_id
+                    self.next_node_id += 1
+                return id_map[scipy_id]
         for i in range(Z.shape[0]):
             if should_log:
                 logging.log_every_n(logging.INFO, 'from scipy z, processed %s of %s', 1000, i, Z.shape[0])
-            internal_id = i + self.num_points
-            self.parent[Z[i, 0].astype(np.int32)] = internal_id
-            self.parent[Z[i, 1].astype(np.int32)] = internal_id
-            self.children[internal_id] = [Z[i, 0].astype(np.int32), Z[i, 1].astype(np.int32)]
+            internal_id = get_id(i + self.num_points)
+            self.parent[get_id(Z[i, 0].astype(np.int32))] = internal_id
+            self.parent[get_id(Z[i, 1].astype(np.int32))] = internal_id
+            self.children[internal_id] = [get_id(Z[i, 0].astype(np.int32)), get_id(Z[i, 1].astype(np.int32))]
             self.needs_update_desc[internal_id] = True
             self.needs_update_model[internal_id] = True
         logging.info('root is %s', self.root())
@@ -195,13 +204,13 @@ class MultiFeatureGrinch(Grinch):
         self.next_node_id = self.num_points * 2
 
     def init_dense_feature(self, dim):
-        return np.zeros((self.max_nodes, dim), dtype=np.float32), np.zeros((self.max_nodes, dim), dtype=np.float32)
+        return np.zeros((self.max_num_points, dim), dtype=np.float32), np.zeros((self.max_num_points, dim), dtype=np.float32)
 
     # def init_sparse_feature(self, dim):
-    #     return csr_matrix((self.max_nodes, dim), dtype=np.float32), csr_matrix((self.max_nodes, dim), dtype=np.float32)
+    #     return csr_matrix((self.max_num_points, dim), dtype=np.float32), csr_matrix((self.max_num_points, dim), dtype=np.float32)
 
     def init_sparse_feature(self, dim):
-        return [[] for _ in range(self.max_nodes)], [[] for _ in range(self.max_nodes)]
+        return [[] for _ in range(self.max_num_points)], [[] for _ in range(self.max_num_points)]
 
     def init_features(self):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
@@ -636,10 +645,10 @@ class MultiFeatureGrinch(Grinch):
 class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
 
     def __init__(self, model, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='none', sim='dot',
-                 max_nodes=None):
+                 max_num_points=None):
         super(WeightedMultiFeatureGrinch, self).__init__(features, num_points,
                                                          dim=dim, rotate_cap=rotate_cap,
-                                                         graft_cap=graft_cap, norm=norm, sim=sim, max_nodes=max_nodes)
+                                                         graft_cap=graft_cap, norm=norm, sim=sim, max_num_points=max_num_points)
         self.model = model
         logging.info('Using len(features)=%s', len(features))
 

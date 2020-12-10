@@ -11,14 +11,20 @@ logging.set_verbosity(logging.INFO)
 
 class Grinch(object):
 
-    def __init__(self, points=None, num_points=None, dim=None, init_points=False, rotate_cap=100, graft_cap=100, norm='l2', sim='dot', max_nodes=1000000):
+    def __init__(self, points=None, num_points=None, dim=None, init_points=False, rotate_cap=100, graft_cap=100, norm='l2', sim='dot', max_num_points=1000000):
 
         self.point_counter = 0
-        if max_nodes is not None:
-            self.max_nodes = max_nodes
+
+        # the representation secures max_num_points positions for the points
+        # max_nodes is the overall number of nodes.
+
+        if max_num_points is not None:
+            self.max_num_points = max_num_points
         else:
-            self.max_nodes = num_points*3
+            self.max_num_points = num_points * 3
         self.norm = norm
+
+        self.max_nodes = self.max_num_points * 3
 
         if points is not None:
             self.points = points
@@ -29,26 +35,26 @@ class Grinch(object):
             self.num_points = num_points
         if dim is not None or points is not None:
             self.dim = dim if dim is not None else self.points.shape[1]
-            self.centroids = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
-            self.radii = np.ones((self.max_nodes, 1), dtype=np.float32)
-            self.sums = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
+            self.centroids = np.zeros((self.max_num_points, self.dim), dtype=np.float32)
+            self.radii = np.ones((self.max_num_points, 1), dtype=np.float32)
+            self.sums = np.zeros((self.max_num_points, self.dim), dtype=np.float32)
 
         if init_points:
             self.points = np.zeros((self.num_points, self.dim), np.float32)
             logging.info('[Grinch] points %s', str(self.points.shape))
 
-        self.ancs = [[] for _ in range(self.max_nodes)]
-        self.notes = [None for _ in range(self.max_nodes)]
+        self.ancs = [[] for _ in range(self.max_num_points)]
+        self.notes = [None for _ in range(self.max_num_points)]
         self.sibs = None
-        self.children = [[] for _ in range(self.max_nodes)]
-        self.descendants = [[] for _ in range(self.max_nodes)]
-        self.scores = -np.inf*np.ones(self.max_nodes,dtype=np.float32)
-        self.needs_update_model = np.zeros(self.max_nodes, dtype=np.bool_)
-        self.new_node = np.ones(self.max_nodes, dtype=np.bool_)
-        self.needs_update_desc = np.zeros(self.max_nodes, dtype=np.bool_)
-        self.parent = -1*np.ones(self.max_nodes, dtype=np.int32)
+        self.children = [[] for _ in range(self.max_num_points)]
+        self.descendants = [[] for _ in range(self.max_num_points)]
+        self.scores = -np.inf*np.ones(self.max_num_points, dtype=np.float32)
+        self.needs_update_model = np.zeros(self.max_num_points, dtype=np.bool_)
+        self.new_node = np.ones(self.max_num_points, dtype=np.bool_)
+        self.needs_update_desc = np.zeros(self.max_num_points, dtype=np.bool_)
+        self.parent = -1*np.ones(self.max_num_points, dtype=np.int32)
         self.next_node_id = self.num_points
-        self.num_descendants = -1 * np.ones(self.max_nodes, dtype=np.float32)
+        self.num_descendants = -1 * np.ones(self.max_num_points, dtype=np.float32)
         self.rotate_cap = rotate_cap
         self.graft_cap = graft_cap
 
@@ -108,26 +114,6 @@ class Grinch(object):
         self.this_time_in_graft = 0
         self.this_time_in_graft_search = 0
         self.cached_nns = None
-
-    def from_scipy_z(self, Z):
-        assert self.num_points == Z.shape[0] + 1
-        for i in range(Z.shape[0]):
-            internal_id = i + self.num_points
-            self.parent[Z[i, 0].astype(np.int32)] = internal_id
-            self.parent[Z[i, 1].astype(np.int32)] = internal_id
-            self.children[internal_id] = [Z[i, 0].astype(np.int32), Z[i, 1].astype(np.int32)]
-            self.needs_update_desc[internal_id] = True
-            self.needs_update_model[internal_id] = True
-        logging.info('root is %s', self.root())
-        assert self.needs_update_model[self.root()]
-        assert self.needs_update_desc[self.root()]
-        self.sums[0:self.num_points] = self.points
-        self.descendants[0:self.num_points] = [[x] for x in range(self.num_points)]
-        self.num_descendants[0:self.num_points] = [1 for x in range(self.num_points)]
-
-        self.update_desc(self.root(), use_tqdm=True)
-        self.update(self.root())
-        self.next_node_id = self.num_points * 2
 
     def all_valid_nodes(self):
         r = self.root()
@@ -492,7 +478,7 @@ class Grinch(object):
         logging.debug('creating new node from nodes %s and %s', n1, n2)
         new_node_id = self.next_node_id
         logging.debug('new node is %s', new_node_id)
-        assert self.next_node_id < self.max_nodes
+        assert self.next_node_id < self.max_num_points
         self.next_node_id += 1
         self.needs_update_model[new_node_id] = True
         self.needs_update_desc[new_node_id] = True
