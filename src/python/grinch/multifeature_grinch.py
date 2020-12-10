@@ -76,7 +76,12 @@ class MultiFeatureGrinch(Grinch):
             self.needs_update_desc[x] = True
             self.descendants[x] = []
 
-    def update_and_insert(self, i_features):
+    def update_and_insert(self, i_features, pids=None):
+
+        # keep track of pids
+        if pids is not None:
+            assert self.pids is not None
+            self.pids.extend(pids)
 
         if self.num_points-1 != self.point_counter:
             logging.info('something is wrong, point_counter != num_points')
@@ -179,7 +184,9 @@ class MultiFeatureGrinch(Grinch):
 
         self.points_set = True
 
-    def from_scipy_z(self, Z, update=False):
+    def from_scipy_z(self, Z, update=False, pids=None):
+
+        self.pids = pids
         logging.info('running from_scipy_z')
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
