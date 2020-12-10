@@ -321,7 +321,8 @@ class Grinch(object):
             offlimits2 = [self.get_sibling(curr)]
         else:
             offlimits2 = []
-        logging.debug('[graft] offlimits1 %s offlimits2 %s', len(offlimits1), len(offlimits2))
+        logging.debug('[graft] len(offlimits1)=%s len(offlimits2)=%s', len(offlimits1), len(offlimits2))
+        logging.debug('[graft] offlimits1 %s offlimits2 %s', str(offlimits1), str(offlimits2))
 
         # Find updates
         self.update(curr)
