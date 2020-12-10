@@ -78,9 +78,9 @@ class MultiFeatureGrinch(Grinch):
 
     def update_and_insert(self, i_features):
 
-        if self.num_points != self.point_counter:
+        if self.num_points-1 != self.point_counter:
             logging.info('something is wrong, point_counter != num_points')
-            self.point_counter = self.num_points
+            self.point_counter = self.num_points-1
 
         logging.info('[update_and_insert] starting now.....')
         s = time.time()
@@ -211,7 +211,7 @@ class MultiFeatureGrinch(Grinch):
             self.update_desc(self.root())
             self.update(self.root())
         self.next_node_id = self.num_points * 2
-        self.point_counter = self.num_points
+        self.point_counter = self.num_points-1
 
     def init_dense_feature(self, dim):
         return np.zeros((self.max_nodes, dim), dtype=np.float32), np.zeros((self.max_nodes, dim), dtype=np.float32)
