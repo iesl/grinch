@@ -779,7 +779,14 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         len_j = len(j)
         s = torch.zeros((len_i, len_j), dtype=torch.float32)
         logging.log_first_n(logging.INFO, 'csim_multi_feature_knn_torch(i=%s, j=%s)', 1, str(i), str(j))
+        logging.log_first_n(logging.INFO, 'len(self.dense_features)=%s', 1, len(self.dense_features))
+        logging.log_first_n(logging.INFO, 'len(self.dense_sums)=%s', 1, len(self.dense_sums))
         logging.log_first_n(logging.INFO, 'len(self.dense_centroids)=%s', 1, len(self.dense_centroids))
+
+        logging.log_first_n(logging.INFO, 'len(self.sparse_features)=%s', 1, len(self.sparse_features))
+        logging.log_first_n(logging.INFO, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
+        logging.log_first_n(logging.INFO, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
+
         for idx in range(len(self.dense_centroids)):
             logging.log_first_n(logging.INFO, 'idx=%s', 10, idx)
             logging.log_first_n(logging.INFO, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
