@@ -484,7 +484,7 @@ class MultiFeatureGrinch(Grinch):
             pc = self.point_counter
         logging.debug('[cknn] i_vec %s point_vecs %s', str(i_vec), str(pc))
         sims = self.csim_multi_feature_knn(i_vec, np.arange(0, pc))
-        logging.debug('[cknn] sims.shape %s point_vecs %s', str(sims.shape))
+        logging.debug('[cknn] sims.shape %s point_vecs', str(sims.shape))
         if offlimits1 is not None:
             sims[:, offlimits1] = -float("Inf")
         if offlimits2 is not None:
