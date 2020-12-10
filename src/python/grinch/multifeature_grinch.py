@@ -210,7 +210,7 @@ class MultiFeatureGrinch(Grinch):
         if update:
             self.update_desc(self.root())
             self.update(self.root())
-        self.next_node_id = self.num_points * 2
+        self.next_node_id = self.max_num_points * 2
         self.point_counter = self.num_points-1
 
     def init_dense_feature(self, dim):
