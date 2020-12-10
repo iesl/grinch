@@ -112,7 +112,7 @@ class MultiFeatureGrinch(Grinch):
             num_points = feat_mat.shape[0]
             prev_num_points = self.dense_point_features[idx].shape[0]
             logging.info('[old] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
-            self.dense_point_features[idx] = np.vstack([self.dense_point_features[idx], feat_mat])
+            self.dense_point_features[idx] = np.hstack([self.dense_point_features[idx], feat_mat])
             logging.info('[new] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
 
         sparse_feature_id = dict()
@@ -121,7 +121,7 @@ class MultiFeatureGrinch(Grinch):
             num_points = feat_mat.shape[0]
             prev_num_points = self.sparse_point_features[idx].shape[0]
             logging.info('[old] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
-            self.sparse_point_features[idx] = scipy.sparse.vstack([self.sparse_point_features[idx], feat_mat])
+            self.sparse_point_features[idx] = scipy.sparse.hstack([self.sparse_point_features[idx], feat_mat])
             logging.info('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
 
         return num_points, prev_num_points
