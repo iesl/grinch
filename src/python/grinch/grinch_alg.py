@@ -690,6 +690,7 @@ class Grinch(object):
         self.children[p].append(c)
 
     def remove_child(self, p, c):
+        assert c in self.children[p], 'trying to remove c=%s from p=%s with kids=%s' % (c, p, str(self.children[p]))
         self.children[p].remove(c)
 
     def clear_children(self, i):
