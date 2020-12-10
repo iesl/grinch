@@ -481,7 +481,8 @@ class Grinch(object):
         logging.debug('creating new node from nodes %s and %s', n1, n2)
         new_node_id = self.next_node_id
         logging.debug('new node is %s', new_node_id)
-        assert self.next_node_id < self.max_num_points
+        assert self.next_node_id < self.max_nodes
+        assert self.next_node_id >= self.max_num_points
         self.next_node_id += 1
         self.needs_update_model[new_node_id] = True
         self.needs_update_desc[new_node_id] = True
