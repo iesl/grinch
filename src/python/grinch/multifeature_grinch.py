@@ -70,8 +70,9 @@ class MultiFeatureGrinch(Grinch):
 
         self.sparse_centroids = [[] for _ in range(len(self.sparse_feature_id))]
         self.sparse_sums = [[] for _ in range(len(self.sparse_feature_id))]
-
     def update_and_insert(self, i_features):
+        logging.info('[update_and_insert] starting now.....')
+        s = time.time()
 
         logging.info('max_num_points %s | current num_points %s', self.max_num_points, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
@@ -92,8 +93,10 @@ class MultiFeatureGrinch(Grinch):
 
         logging.info('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points, num_points)
         for i in range(prev_num_points, prev_num_points + num_points):
+            logging.info('[update_and_insert] inserting %s - elapsed %s', i, time.time() - s)
             self.insert(i)
             self.num_points += 1
+        logging.info('[update_and_insert] starting now.....done! Elapsed %s', time.time() - s)
 
     def update_features(self, i_features):
         logging.info('updating %s features', len(i_features))
