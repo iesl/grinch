@@ -83,9 +83,9 @@ class MultiFeatureGrinch(Grinch):
             assert self.pids is not None
             self.pids.extend(pids)
 
-        if self.num_points-1 != self.point_counter:
+        if self.num_points != self.point_counter:
             logging.info('something is wrong, point_counter != num_points')
-            self.point_counter = self.num_points-1
+            self.point_counter = self.num_points
 
         logging.info('[update_and_insert] starting now.....')
         s = time.time()
