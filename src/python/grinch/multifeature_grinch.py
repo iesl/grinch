@@ -789,7 +789,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         logging.log_first_n(logging.INFO, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
         logging.log_first_n(logging.INFO, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
 
-        for idx in range(len(self.dense_centroids)):
+        for idx in range(len(self.dense_features)):
             logging.log_first_n(logging.INFO, 'idx=%s', 10, idx)
             logging.log_first_n(logging.INFO, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
             w, b = self.model.weight_for(self.dense_features[idx][0])
@@ -805,7 +805,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
             if record_dict is not None:
                 record_dict[self.dense_features[idx][0]] = feat_score
             s += feat_score
-        for idx in range(len(self.sparse_centroids)):
+        for idx in range(len(self.sparse_features)):
             w, b = self.model.weight_for(self.sparse_features[idx][0])
             rhs = self.sparse_features[idx][3][j]  # Grab the original feature matrix for j
             if self.sparse_features[idx][4] == FeatCalc.L2:
@@ -827,7 +827,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
     def pw_sim_torch(self, i, j, record_dict=None):
         assert len(i) == len(j)
         s = torch.zeros(len(i), dtype=torch.float32)
-        for idx in range(len(self.dense_centroids)):
+        for idx in range(len(self.dense_features)):
             w, b = self.model.weight_for(self.dense_features[idx][0])
             logging.log_first_n(logging.INFO, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape),
                                 str(self.dense_centroids[idx][j].shape))
@@ -843,7 +843,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                 record_dict[self.dense_features[idx][0]] = feat_score
             s += feat_score
         idx_offset = len(self.dense_features)
-        for idx in range(len(self.sparse_centroids)):
+        for idx in range(len(self.sparse_features)):
             w, b = self.model.weight_for(self.sparse_features[idx][0])
             if self.sparse_features[idx][4] == FeatCalc.L2:
                 feat_score = w * self.p_l2dist_feature_sparse(idx, i, j)
