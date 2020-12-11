@@ -769,6 +769,8 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                 feat_score = w * self.c_dot_feature_dense(idx, i, j)
             elif self.dense_features[idx][4] == FeatCalc.L2_gt_one:
                 feat_score = w * self.c_l2dist_gt_one_feature_dense(idx, i, j)
+            elif self.dense_features[idx][4] == FeatCalc.NO_MATCH:
+                feat_score = w * self.c_no_match_feature_dense_knn(idx, i, j)
             if b is not None:
                 feat_score += b
             s += feat_score
