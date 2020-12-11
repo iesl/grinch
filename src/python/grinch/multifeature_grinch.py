@@ -183,9 +183,10 @@ class MultiFeatureGrinch(Grinch):
 
         self.points_set = True
 
-    def from_scipy_z(self, Z, update=False, pids=None):
+    def from_scipy_z(self, Z, update=False, pids=None, canopies=None):
 
         self.pids = pids
+        self.canopies = canopies
         logging.info('running from_scipy_z')
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
@@ -680,10 +681,10 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         logging.info('Using len(features)=%s', len(features))
 
     @staticmethod
-    def from_agglom(agglom, pids=None):
+    def from_agglom(agglom, pids=None, canopies=None):
         # Set tree structure
         grinch = WeightedMultiFeatureGrinch(agglom.model, agglom.features, agglom.num_points)
-        grinch.from_scipy_z(agglom.Z,pids=pids)
+        grinch.from_scipy_z(agglom.Z,pids=pids, canopies=canopies)
         return grinch
 
     def save_and_quit(self, filename):

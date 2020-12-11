@@ -12,7 +12,7 @@ logging.set_verbosity(logging.INFO)
 class Grinch(object):
 
     def __init__(self, points=None, num_points=None, dim=None, init_points=False, rotate_cap=100,
-                 graft_cap=100, norm='l2', sim='dot', max_num_points=1000000, pids=None):
+                 graft_cap=100, norm='l2', sim='dot', max_num_points=1000000, pids=None, canopies=None):
 
         self.point_counter = 0
 
@@ -28,6 +28,7 @@ class Grinch(object):
         self.max_nodes = self.max_num_points * 3
 
         self.pids = pids
+        self.canopies = canopies
 
         if points is not None:
             self.points = points
