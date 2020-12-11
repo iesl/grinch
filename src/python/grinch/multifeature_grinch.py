@@ -770,7 +770,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
             elif self.dense_features[idx][4] == FeatCalc.L2_gt_one:
                 feat_score = w * self.c_l2dist_gt_one_feature_dense(idx, i, j)
             elif self.dense_features[idx][4] == FeatCalc.NO_MATCH:
-                feat_score = w * self.c_no_match_feature_dense_knn(idx, i, j)
+                feat_score = w * self.c_no_match_feature_dense(idx, i, j)
             if b is not None:
                 feat_score += b
             s += feat_score
@@ -953,9 +953,15 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
         return torch.from_numpy(res.astype(np.float32))
 
-    def c_no_match_feature_dense_knn(self, idx, i, j):
+    def c_no_match_feature_dense(self, idx, i, j):
         c_i = self.dense_centroids[idx][i]
         c_jT = self.dense_centroids[idx][j].T
+        res = np.logical_and(np.logical_and(c_i != c_jT, c_i != -1), c_jT != -1)
+        return torch.from_numpy(res.astype(np.float32))
+
+    def c_no_match_feature_dense_knn(self, idx, i, c_j):
+        c_i = self.dense_centroids[idx][i]
+        c_jT = c_j.T
         res = np.logical_and(np.logical_and(c_i != c_jT, c_i != -1), c_jT != -1)
         return torch.from_numpy(res.astype(np.float32))
 
