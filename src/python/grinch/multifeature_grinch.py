@@ -673,19 +673,25 @@ class MultiFeatureGrinch(Grinch):
 class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
 
     def __init__(self, model, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='none', sim='dot',
-                 max_num_points=None):
+                 max_num_points=None, min_allowable_sim=-20000.0):
         super(WeightedMultiFeatureGrinch, self).__init__(features, num_points,
                                                          dim=dim, rotate_cap=rotate_cap,
                                                          graft_cap=graft_cap, norm=norm, sim=sim, max_num_points=max_num_points)
         self.model = model
         logging.info('Using len(features)=%s', len(features))
+        self.min_allowable_sim = min_allowable_sim
 
     @staticmethod
     def from_agglom(agglom, pids=None, canopies=None):
         # Set tree structure
         grinch = WeightedMultiFeatureGrinch(agglom.model, agglom.features, agglom.num_points)
         grinch.from_scipy_z(agglom.Z,pids=pids, canopies=canopies)
+        grinch.min_allowable_sim = agglom.min_allowable_sim
         return grinch
+
+    def similarity_threshold_from_agglom(self, threshold):
+        """Transform distance threshold to similarity one"""
+        pos_sim = threshold - np.minimum(0.0, self.min_allowable_sim)
 
     def save_and_quit(self, filename):
         # remove features
@@ -837,6 +843,8 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                 feat_score = w * self.c_dot_feature_dense_knn(idx, i, rhs)
             elif self.dense_features[idx][4] == FeatCalc.L2_gt_one:
                 feat_score = w * self.c_l2dist_gt_one_feature_dense_knn(idx, i, rhs)
+            elif self.dense_features[idx][4] == FeatCalc.NO_MATCH:
+                feat_score = w * self.c_no_match_feature_dense_knn(idx, i, rhs)
             if b is not None:
                 feat_score += b
             if record_dict is not None:
@@ -933,6 +941,12 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
     def c_l2dist_gt_one_feature_dense_knn(self, idx, i, c_j):
         c_i = self.dense_centroids[idx][i]
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
+        return torch.from_numpy(res.astype(np.float32))
+
+    def c_no_match_feature_dense_knn(self, idx, i, c_j):
+        c_i = self.dense_centroids[idx][i]
+        c_jT = c_j.T
+        res = np.logical_and(np.logical_and(c_i != c_jT, c_i != -1), c_jT != -1)
         return torch.from_numpy(res.astype(np.float32))
 
     def p_dot_feature_dense(self, idx, i, j):
