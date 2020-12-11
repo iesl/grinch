@@ -681,10 +681,10 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         logging.info('Using len(features)=%s', len(features))
 
     @staticmethod
-    def from_agglom(agglom):
+    def from_agglom(agglom, pids=None):
         # Set tree structure
         grinch = WeightedMultiFeatureGrinch(agglom.model, agglom.features, agglom.num_points)
-        grinch.from_scipy_z(agglom.Z)
+        grinch.from_scipy_z(agglom.Z,pids=pids)
         return grinch
 
     def save_and_quit(self, filename):
