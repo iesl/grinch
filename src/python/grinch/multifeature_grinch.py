@@ -882,6 +882,8 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                 feat_score = w * self.p_dot_feature_dense(idx, i, j)
             elif self.dense_features[idx][4] == FeatCalc.L2_gt_one:
                 feat_score = w * self.p_l2dist_gt_one_feature_dense(idx, i, j)
+            elif self.dense_features[idx][4] == FeatCalc.NO_MATCH:
+                feat_score = w * self.p_no_match_feature_dense(idx, i, j)
             if b is not None:
                 feat_score += b
             if record_dict is not None:
@@ -930,6 +932,12 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         c_i = self.dense_centroids[idx][i]
         c_j = self.dense_centroids[idx][j]
         res = (paired_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2) > 1
+        return torch.from_numpy(res.astype(np.float32))
+
+    def p_no_match_feature_dense(self, idx, i, j):
+        c_i = self.dense_centroids[idx][i]
+        c_j = self.dense_centroids[idx][j]
+        res = np.squeeze(np.logical_and(np.logical_and(c_i != c_j, c_i != -1), c_j != -1), 1)
         return torch.from_numpy(res.astype(np.float32))
 
     def c_l2dist_gt_one_feature_dense(self, idx, i, j):
