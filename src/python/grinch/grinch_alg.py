@@ -57,7 +57,7 @@ class Grinch(object):
         self.new_node = np.ones(self.max_nodes, dtype=np.bool_)
         self.needs_update_desc = np.zeros(self.max_nodes, dtype=np.bool_)
         self.parent = -1*np.ones(self.max_nodes, dtype=np.int32)
-        self.next_node_id = self.num_points
+        self.next_node_id = self.max_num_points
         self.num_descendants = -1 * np.ones(self.max_nodes, dtype=np.float32)
         self.rotate_cap = rotate_cap
         self.graft_cap = graft_cap
