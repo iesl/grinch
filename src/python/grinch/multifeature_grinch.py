@@ -224,6 +224,50 @@ class MultiFeatureGrinch(Grinch):
             self.update_desc(self.root())
             self.update(self.root())
 
+    def grow_dense_feature(self, new_max_nodes, existing):
+        to_append1 = np.zeros((new_max_nodes-self.max_nodes, existing[0].shape[1]), dtype=np.float32)
+        to_append2 = np.zeros((new_max_nodes-self.max_nodes, existing[1].shape[1]), dtype=np.float32)
+        new_df1 = np.vstack([existing[0], to_append1])
+        new_df2 = np.vstack([existing[1], to_append2])
+        return new_df1, new_df2
+
+    def grow_sparse_feature(self, new_max_nodes, existing):
+        to_append1 = [[] for _ in range(new_max_nodes - self.max_nodes)]
+        to_append2 = [[] for _ in range(new_max_nodes - self.max_nodes)]
+        new_sf1 = existing[0].extend(to_append1)
+        new_sf2 = existing[1].extend(to_append2)
+        return new_sf1, new_sf2
+
+    def grow_features(self, new_max_nodes):
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
+            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+                         str(feat_mat.shape))
+            assert self.dense_feature_id[fn] == idx
+            c, s = self.grow_dense_feature(new_max_nodes, [self.dense_centroids[idx], self.dense_sums[idx]])
+            self.dense_centroids[idx] = c
+            self.dense_sums[idx] = s
+            logging.info(
+                'Initialize feature - name=%s, dense=%s, dim=%s, mat=%s, self.dense_centroids[%s]=%s, self.dense_sums[%s]=%s',
+                fn, is_dense, dim,
+                str(feat_mat.shape), idx, str(self.dense_centroids[idx].shape), idx,
+                str(self.dense_sums[idx].shape))
+
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
+            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+                         str(feat_mat.shape))
+            assert self.sparse_feature_id[fn] == idx
+            c, s = self.grow_sparse_feature(new_max_nodes, [self.sparse_centroids[idx], self.sparse_sums[idx]])
+            self.sparse_centroids[idx] = c
+            self.sparse_sums[idx] = s
+
+    def grow_if_necessary(self):
+        if self.next_node_id >= self.max_nodes:
+            logging.info('resizing internal structures...')
+            new_max_nodes = 2 * self.max_nodes
+            logging.info('new max nodes %s', new_max_nodes)
+            self.grow_nodes(new_max_nodes)
+            self.grow_features(new_max_nodes)
+            self.max_nodes = new_max_nodes
 
     def init_dense_feature(self, dim):
         return np.zeros((self.max_nodes, dim), dtype=np.float32), np.zeros((self.max_nodes, dim), dtype=np.float32)

@@ -468,21 +468,13 @@ class Grinch(object):
         self.time_in_update += time.time() - s
 
     def single_update_radii(self, i, metric):
-        logging.debug('updating node %s', i)
-        assert not self.needs_update_model[i]
-        if len(self.descendants[i]) == 0:
-            logging.info('no descendants...')
-            return
-        this_node_pts = self.points[self.descendants[i]]
-        from er.clustering.hac import batched_cdist
-        csims = batched_cdist(this_node_pts, self.get_centroid(i), metric=metric, use_tqdm=False)
-        max_ud = np.max(csims)
-        self.radii[i] = max_ud
+        raise Exception('currently not available')
 
     def node_from_nodes(self, n1, n2):
         logging.debug('creating new node from nodes %s and %s', n1, n2)
         new_node_id = self.next_node_id
         logging.debug('new node is %s', new_node_id)
+        self.grow_if_necessary()
         assert self.next_node_id < self.max_nodes
         assert self.next_node_id >= self.max_num_points
         self.next_node_id += 1
@@ -490,6 +482,32 @@ class Grinch(object):
         self.needs_update_desc[new_node_id] = True
         self.num_descendants[new_node_id] = self.num_descendants[n1] + self.num_descendants[n2]
         return new_node_id
+
+    def grow_if_necessary(self):
+        if self.next_node_id >= self.max_nodes:
+            logging.info('resizing internal structures...')
+            new_max_nodes = 2*self.max_nodes
+            logging.info('new max nodes %s', new_max_nodes)
+            self.grow_nodes(new_max_nodes)
+            self.grow_centroids_and_sums(new_max_nodes)
+            self.max_nodes = new_max_nodes
+
+    def grow_nodes(self, new_max_nodes):
+        self.ancs.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
+        self.sibs = None
+        self.children.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
+        self.descendants.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
+        self.scores = np.hstack([self.scores, -np.inf * np.ones(new_max_nodes-self.max_nodes, dtype=np.float32)])
+        self.needs_update_model = np.hstack([self.needs_update_model, np.zeros(new_max_nodes-self.max_nodes, dtype=np.bool_)])
+        self.new_node = np.hstack([self.new_node, np.ones(new_max_nodes-self.max_nodes, dtype=np.bool_)])
+        self.needs_update_desc = np.hstack([self.needs_update_desc,np.zeros(new_max_nodes-self.max_nodes, dtype=np.bool_)])
+        self.parent = np.hstack([self.parent,-1 * np.ones(new_max_nodes-self.max_nodes, dtype=np.int32)])
+        self.num_descendants = np.hstack([self.num_descendants, -1 * np.ones(new_max_nodes-self.max_nodes, dtype=np.float32)])
+
+    def grow_centroids_and_sums(self, new_max_nodes):
+        self.centroids = np.vstack([self.centroids, np.zeros((new_max_nodes-self.max_nodes, self.dim), dtype=np.float32)])
+        self.radii = np.vstack([self.radii, np.ones((new_max_nodes-self.max_nodes, 1), dtype=np.float32)])
+        self.sums = np.vstack([self.sums, np.zeros((new_max_nodes-self.max_nodes, self.dim), dtype=np.float32)])
 
     def add_pt(self, i):
         self.sums[i] += self.points[i]
