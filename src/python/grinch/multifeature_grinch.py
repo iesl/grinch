@@ -717,13 +717,14 @@ class MultiFeatureGrinch(Grinch):
 class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
 
     def __init__(self, model, features, num_points, dim=None, rotate_cap=100, graft_cap=100, norm='none', sim='dot',
-                 max_num_points=None, min_allowable_sim=-20000.0):
+                 max_num_points=None, min_allowable_sim=-20000.0, pids=None):
         super(WeightedMultiFeatureGrinch, self).__init__(features, num_points,
                                                          dim=dim, rotate_cap=rotate_cap,
                                                          graft_cap=graft_cap, norm=norm, sim=sim, max_num_points=max_num_points)
         self.model = model
         logging.info('Using len(features)=%s', len(features))
         self.min_allowable_sim = min_allowable_sim
+        self.pids = pids
 
     @staticmethod
     def from_agglom(agglom, pids=None, canopies=None):
