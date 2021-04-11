@@ -156,7 +156,6 @@ class MultiFeatureGrinch(Grinch):
             self.sparse_sums[idx][i] = mat[i].copy()
         self.num_descendants[i] = 1
         self.point_counter += 1
-        self.num_points += 1
         self.descendants[i].append(i)
         self.compute_centroid(i, False)
         self.new_node[i] = False
