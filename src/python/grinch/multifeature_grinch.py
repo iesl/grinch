@@ -462,6 +462,7 @@ class MultiFeatureGrinch(Grinch):
         if self.point_counter == 0:
             self.add_pt(i)
         else:
+            self.grow_points_if_necessary()
             self.add_pt(i)
             dists, nns = self.cknn(np.array([i], dtype=np.int32), self.k, None, None, pc=self.point_counter - 1)
             logging.debug('[insert] dists=%s nns=%s', str(dists), str(nns))
