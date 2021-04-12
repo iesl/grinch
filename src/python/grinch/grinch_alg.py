@@ -34,7 +34,7 @@ class Grinch(object):
             self.points = points
             self.num_points = points.shape[0]
             self.dim = points.shape[1]
-            logging.info('[Grinch] points %s', str(self.points.shape))
+            logging.debug('[Grinch] points %s', str(self.points.shape))
         if num_points:
             self.num_points = num_points
         if dim is not None or points is not None:
@@ -45,7 +45,7 @@ class Grinch(object):
 
         if init_points:
             self.points = np.zeros((self.num_points, self.dim), np.float32)
-            logging.info('[Grinch] points %s', str(self.points.shape))
+            logging.debug('[Grinch] points %s', str(self.points.shape))
 
         self.ancs = [[] for _ in range(self.max_nodes)]
         self.notes = [None for _ in range(self.max_nodes)]
@@ -63,26 +63,26 @@ class Grinch(object):
         self.graft_cap = graft_cap
 
         if norm == 'l2':
-            logging.info('Using centroid = l2')
+            logging.debug('Using centroid = l2')
             self.compute_centroid = self.compute_centroid_l2_norm
         elif norm == 'l_inf':
-            logging.info('Using centroid = l_inf')
+            logging.debug('Using centroid = l_inf')
             self.compute_centroid = self.compute_centroid_l_inf_norm
         elif norm == 'none':
-            logging.info('Using centroid = none')
+            logging.debug('Using centroid = none')
             self.compute_centroid = self.compute_centroid_no_norm
 
         if sim == 'dot':
-            logging.info('Using csim = dot')
+            logging.debug('Using csim = dot')
             self.csim = self.csim_dot
         elif sim == 'l2':
-            logging.info('Using csim = l2')
+            logging.debug('Using csim = l2')
             self.csim = self.csim_l2
         elif sim == 'sql2':
-            logging.info('Using csim = sql2')
+            logging.debug('Using csim = sql2')
             self.csim = self.csim_sql2
         # elif sim == 'ward':
-        #     logging.info('Using csim = sql2')
+        #     logging.debug('Using csim = sql2')
         #     self.csim = self.csim_ward
 
         self.k = 1
@@ -485,9 +485,9 @@ class Grinch(object):
 
     def grow_if_necessary(self):
         if self.next_node_id >= self.max_nodes:
-            logging.info('resizing internal structures...')
+            logging.debug('resizing internal structures...')
             new_max_nodes = 2*self.max_nodes
-            logging.info('new max nodes %s', new_max_nodes)
+            logging.debug('new max nodes %s', new_max_nodes)
             self.grow_nodes(new_max_nodes)
             self.grow_centroids_and_sums(new_max_nodes)
             self.max_nodes = new_max_nodes
@@ -709,7 +709,7 @@ class Grinch(object):
         self.children[i].clear()
 
     def write_tree(self, filename, lbls):
-        logging.info('writing tree to file %s', filename)
+        logging.debug('writing tree to file %s', filename)
         with open(filename, 'w') as fin:
             for i in tqdm(range(self.num_points), desc='write file'):
                 fin.write('%s\t%s\t%s\n' % (i, self.get_parent(i), lbls[i]))

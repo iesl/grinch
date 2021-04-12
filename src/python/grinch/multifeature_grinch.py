@@ -114,48 +114,48 @@ class MultiFeatureGrinch(Grinch):
             self.num_points += 1
         logging.info('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points,
                      num_points)
-        logging.info('[update_and_insert] starting now.....done! Elapsed %s', time.time() - s)
+        logging.debug('[update_and_insert] starting now.....done! Elapsed %s', time.time() - s)
 
     def update_features(self, i_features):
-        logging.info('updating %s features', len(i_features))
+        logging.debug('updating %s features', len(i_features))
 
         dense_features = [(fn, is_dense, dim, feat_mat, feat_calc, centroid_type)
                           for fn, is_dense, dim, feat_mat, feat_calc, centroid_type in i_features if is_dense]
         sparse_features = [(fn, is_dense, dim, feat_mat, feat_calc, centroid_type)
                            for fn, is_dense, dim, feat_mat, feat_calc, centroid_type in i_features if not is_dense]
 
-        logging.info('%s dense features', len(dense_features))
-        logging.info('%s sparse features', len(sparse_features))
+        logging.debug('%s dense features', len(dense_features))
+        logging.debug('%s sparse features', len(sparse_features))
 
         dense_feature_id = dict()
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(dense_features):
             dense_feature_id[fn] = idx
             num_points = feat_mat.shape[0]
             prev_num_points = self.dense_point_features[idx].shape[0]
-            logging.info('[old] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
-            logging.info('[old] feat_mat.shape = %s', str(feat_mat.shape))
+            logging.debug('[old] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
+            logging.debug('[old] feat_mat.shape = %s', str(feat_mat.shape))
             self.dense_point_features[idx] = np.vstack([self.dense_point_features[idx], feat_mat])
-            logging.info('[new] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
+            logging.debug('[new] dense_point_features[%s].shape = %s', idx, str(self.dense_point_features[idx].shape))
 
         sparse_feature_id = dict()
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(sparse_features):
             sparse_feature_id[fn] = idx
             num_points = feat_mat.shape[0]
             prev_num_points = self.sparse_point_features[idx].shape[0]
-            logging.info('[old] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
-            logging.info('[old] feat_mat.shape = %s', str(feat_mat.shape))
+            logging.debug('[old] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
+            logging.debug('[old] feat_mat.shape = %s', str(feat_mat.shape))
             self.sparse_point_features[idx] = scipy.sparse.vstack([self.sparse_point_features[idx], feat_mat])
-            logging.info('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
+            logging.debug('[new] sparse_point_features[%s].shape = %s', idx, str(self.sparse_point_features[idx].shape))
 
         return num_points, prev_num_points
 
     def add_pt(self, i):
-        logging.log_every_n(logging.INFO, 'Adding point %s', 1000, i)
+        logging.log_every_n(logging.debug, 'Adding point %s', 1000, i)
         for idx, mat in enumerate(self.dense_point_features):
-            # logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            # logging.log_every_n(logging.debug, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat[i].copy()
         for idx, mat in enumerate(self.sparse_point_features):
-            # logging.log_every_n(logging.INFO, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            # logging.log_every_n(logging.debug, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             self.sparse_sums[idx][i] = mat[i].copy()
         self.num_descendants[i] = 1
         self.point_counter += 1
@@ -172,13 +172,13 @@ class MultiFeatureGrinch(Grinch):
         :return:
         """
         self.init_features()
-        logging.log_every_n(logging.INFO, 'Adding %s points', 1000, len(i))
+        logging.log_every_n(logging.debug, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
-            logging.log_every_n(logging.INFO, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            logging.log_every_n(logging.debug, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat[i]
             self.dense_centroids[idx][i] = mat[i]
         for idx, mat in enumerate(self.sparse_point_features):
-            logging.log_every_n(logging.INFO, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            logging.log_every_n(logging.debug, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             for ii in i:
                 self.sparse_sums[idx][ii] = mat[ii]
                 self.sparse_centroids[idx][ii] = mat[ii]
@@ -189,7 +189,7 @@ class MultiFeatureGrinch(Grinch):
 
         self.pids = pids
         self.canopies = canopies
-        logging.info('running from_scipy_z')
+        logging.debug('running from_scipy_z')
         assert self.num_points == Z.shape[0] + 1
         should_log = self.num_points > 30000
         id_map = dict()
@@ -198,25 +198,25 @@ class MultiFeatureGrinch(Grinch):
 
         def get_id(scipy_id):
             if scipy_id < self.num_points:
-                logging.log_first_n(logging.INFO, 'scipy_id %s in id_map', 10, scipy_id)
+                logging.log_first_n(logging.DEBUG, 'scipy_id %s in id_map', 10, scipy_id)
                 return scipy_id
             else:
                 if scipy_id not in id_map:
                     id_map[scipy_id] = self.next_node_id
                     self.next_node_id += 1
-                    logging.log_first_n(logging.INFO, 'scipy_id %s not in id_map, id_map[scipy_id]=%s, self.next_node_id', 10, scipy_id, id_map[scipy_id], self.next_node_id)
+                    logging.log_first_n(logging.DEBUG, 'scipy_id %s not in id_map, id_map[scipy_id]=%s, self.next_node_id', 10, scipy_id, id_map[scipy_id], self.next_node_id)
 
                 return id_map[scipy_id]
         for i in range(Z.shape[0]):
             if should_log:
-                logging.log_every_n(logging.INFO, 'from scipy z, processed %s of %s', 1000, i, Z.shape[0])
+                logging.log_every_n(logging.debug, 'from scipy z, processed %s of %s', 1000, i, Z.shape[0])
             internal_id = get_id(i + self.num_points)
             self.parent[get_id(Z[i, 0].astype(np.int32))] = internal_id
             self.parent[get_id(Z[i, 1].astype(np.int32))] = internal_id
             self.children[internal_id] = [get_id(Z[i, 0].astype(np.int32)), get_id(Z[i, 1].astype(np.int32))]
             self.needs_update_desc[internal_id] = True
             self.needs_update_model[internal_id] = True
-        logging.info('root is %s', self.root())
+        logging.debug('root is %s', self.root())
         assert self.needs_update_model[self.root()]
         assert self.needs_update_desc[self.root()]
         self.descendants[0:self.num_points] = [[x] for x in range(self.num_points)]
@@ -242,20 +242,20 @@ class MultiFeatureGrinch(Grinch):
 
     def grow_features(self, new_max_nodes):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
-            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
             assert self.dense_feature_id[fn] == idx
             c, s = self.grow_dense_feature(new_max_nodes, [self.dense_centroids[idx], self.dense_sums[idx]])
             self.dense_centroids[idx] = c
             self.dense_sums[idx] = s
-            logging.info(
+            logging.debug(
                 'Initialize feature - name=%s, dense=%s, dim=%s, mat=%s, self.dense_centroids[%s]=%s, self.dense_sums[%s]=%s',
                 fn, is_dense, dim,
                 str(feat_mat.shape), idx, str(self.dense_centroids[idx].shape), idx,
                 str(self.dense_sums[idx].shape))
 
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
-            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
             assert self.sparse_feature_id[fn] == idx
             c, s = self.grow_sparse_feature(new_max_nodes, [self.sparse_centroids[idx], self.sparse_sums[idx]])
@@ -264,9 +264,9 @@ class MultiFeatureGrinch(Grinch):
 
     def grow_if_necessary(self):
         if self.next_node_id >= self.max_nodes:
-            logging.info('resizing internal structures...')
+            logging.debug('resizing internal structures...')
             new_max_nodes = 2 * self.max_nodes
-            logging.info('new max nodes %s', new_max_nodes)
+            logging.debug('new max nodes %s', new_max_nodes)
             self.grow_nodes(new_max_nodes)
             self.grow_features(new_max_nodes)
             self.max_nodes = new_max_nodes
@@ -282,20 +282,20 @@ class MultiFeatureGrinch(Grinch):
 
     def init_features(self):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
-            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
             self.dense_feature_id[fn] = idx
             c, s = self.init_dense_feature(dim)
             self.dense_centroids[idx] = s
             self.dense_sums[idx] = c
-            logging.info(
+            logging.debug(
                 'Initialize feature - name=%s, dense=%s, dim=%s, mat=%s, self.dense_centroids[%s]=%s, self.dense_sums[%s]=%s',
                 fn, is_dense, dim,
                 str(feat_mat.shape), idx, str(self.dense_centroids[idx].shape), idx,
                 str(self.dense_sums[idx].shape))
 
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
-            logging.info('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
             self.sparse_feature_id[fn] = idx
             c, s = self.init_sparse_feature(dim)
@@ -318,7 +318,7 @@ class MultiFeatureGrinch(Grinch):
     #         norm = np.linalg.norm(self.dense_centroids[idx][i]) if self.norm == 'l2' else 0.0
     #         if norm != 0.0:
     #             self.dense_centroids[idx][i] /= norm
-    #         logging.log_first_n(logging.INFO, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
+    #         logging.log_first_n(logging.DEBUG, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
     #                             str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx].shape))
     #     for idx in range(len(self.sparse_features)):
     #         self.sparse_centroids[idx][i] = self.sparse_sums[idx][i].copy()
@@ -326,7 +326,7 @@ class MultiFeatureGrinch(Grinch):
     #         norm = (self.sparse_centroids[idx][i] @ self.sparse_centroids[idx][i].T).todense().A[0,0] if self.norm == 'l2' else 0.0
     #         if norm != 0.0:
     #             self.sparse_centroids[idx][i] /= norm
-    #         logging.log_first_n(logging.INFO, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
+    #         logging.log_first_n(logging.DEBUG, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
     #                             str(self.sparse_centroids[idx][i].shape))
 
     def compute_centroid_multi_feature(self, i, update_sums=False):
@@ -340,7 +340,7 @@ class MultiFeatureGrinch(Grinch):
                 self.dense_compute_centroid_binary(idx, i)
             elif self.dense_features[idx][5] == CentroidType.NO_NORM:
                 self.dense_compute_centroid_no_norm(idx, i)
-            logging.log_first_n(logging.INFO, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
+            logging.log_first_n(logging.DEBUG, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
                                 str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx].shape))
         for idx in range(len(self.sparse_features)):
             if update_sums:
@@ -353,7 +353,7 @@ class MultiFeatureGrinch(Grinch):
                 self.sparse_compute_centroid_binary(idx, i)
             elif self.sparse_features[idx][5] == CentroidType.NO_NORM:
                 self.sparse_compute_centroid_no_norm(idx, i)
-            logging.log_first_n(logging.INFO, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
+            logging.log_first_n(logging.DEBUG, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
                                 str(self.sparse_centroids[idx][i].shape))
 
     def dense_compute_centroid_l2_norm(self, idx, i):
@@ -405,7 +405,7 @@ class MultiFeatureGrinch(Grinch):
 
     def insert(self, i):
         if self.points_set is False:
-            logging.info('grinch points not set, setting now for all points.....')
+            logging.debug('grinch points not set, setting now for all points.....')
             self.set_points(np.arange(self.num_points))
         s = time.time()
         logging.debug('[insert] insert(%s) pc=%s', i, self.point_counter)
@@ -634,13 +634,13 @@ class MultiFeatureGrinch(Grinch):
         # import pdb; pdb.set_trace()
         s = 0
         for idx in range(len(self.dense_centroids)):
-            logging.log_first_n(logging.INFO, 'dense[%s] - %s @ %s.T', 10, idx,
+            logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx,
                                 str(self.dense_centroids[idx][None, i].shape),
                                 str(self.dense_centroids[idx][None, j].shape))
             feat_score = self.dense_centroids[idx][None, i] @ self.dense_centroids[idx][None, j].T
             s += feat_score
         for idx in range(len(self.sparse_centroids)):
-            logging.log_first_n(logging.INFO, 'sparse[%s] - %s @ %s.T', 10, idx,
+            logging.log_first_n(logging.DEBUG, 'sparse[%s] - %s @ %s.T', 10, idx,
                                 str(self.sparse_centroids[idx][i].shape), str(self.sparse_centroids[idx][j].shape))
             feat_score = (self.sparse_centroids[idx][i] @ self.sparse_centroids[idx][j].T).todense().A
             s += feat_score
@@ -691,7 +691,7 @@ class MultiFeatureGrinch(Grinch):
                     self.update(jj)
         s = np.zeros(len(i), dtype=np.float32)
         # for idx in range(len(self.dense_centroids)):
-        #     logging.log_first_n(logging.INFO, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx][j].shape))
+        #     logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx][j].shape))
         #     if self.dense_features[idx][4] == FeatCalc.L2:
         #         feat_score = w * self.p_l2dist_feature_dense(idx, i, j)
         #     elif self.dense_features[idx][4] == FeatCalc.DOT:
@@ -724,7 +724,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                                                          dim=dim, rotate_cap=rotate_cap,
                                                          graft_cap=graft_cap, norm=norm, sim=sim, max_num_points=max_num_points)
         self.model = model
-        logging.info('Using len(features)=%s', len(features))
+        logging.debug('Using len(features)=%s', len(features))
         self.min_allowable_sim = min_allowable_sim
         self.pids = pids
 
@@ -764,30 +764,30 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         #     self.add_pt(i)
         self.set_points([x for x in range(0, self.num_points)])
         en_add = time.time()
-        logging.info('Time to add points: %s', en_add - st_add)
+        logging.debug('Time to add points: %s', en_add - st_add)
         st_sims = time.time()
         sims = self.csim_multi_feature_knn_batched(np.arange(self.num_points), np.arange(self.num_points))
         en_sims = time.time()
-        logging.info('Time to compute sims: %s', en_sims - st_sims)
-        logging.info('Finished batched similarities!')
+        logging.debug('Time to compute sims: %s', en_sims - st_sims)
+        logging.debug('Finished batched similarities!')
         st_prep = time.time()
         dists = sims.max() - sims
         dists = (dists + dists.T) / 2.0
         np.fill_diagonal(dists, 0.0)
         dists = squareform(dists)
         en_prep = time.time()
-        logging.info('Time to compute sims: %s', en_prep - st_prep)
-        logging.info('Finished preparing distances!')
-        logging.info('Running hac')
+        logging.debug('Time to compute sims: %s', en_prep - st_prep)
+        logging.debug('Finished preparing distances!')
+        logging.debug('Running hac')
         st_linkage = time.time()
         Z = linkage(dists, method='average')
         en_linkage = time.time()
-        logging.info('Time to run HAC: %s', en_linkage - st_linkage)
-        logging.info('Finished hac!')
+        logging.debug('Time to run HAC: %s', en_linkage - st_linkage)
+        logging.debug('Finished hac!')
         st_z = time.time()
         self.from_scipy_z(Z)
         en_z = time.time()
-        logging.info('from_scipy_z: %s', en_z - st_z)
+        logging.debug('from_scipy_z: %s', en_z - st_z)
 
     def csim_multi_feature(self, i, j):
         """
@@ -839,13 +839,13 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         len_j = len(j)
         should_log = len_i > 3 * batch_size
         if should_log:
-            logging.info('[csim_multi_feature_knn_batched] %s by %s', len_i, len_j)
+            logging.debug('[csim_multi_feature_knn_batched] %s by %s', len_i, len_j)
         res = np.zeros((len_i, len_j), dtype=np.float32)
         i_batches = [x for x in range(0, len_i, batch_size)]
         st = time.time()
         for idx, ii in enumerate(i_batches):
             if should_log:
-                logging.info('[csim_multi_feature_knn_batched] %s by %s - %s of %s in % seconds', len_i, len_j, idx,
+                logging.debug('[csim_multi_feature_knn_batched] %s by %s - %s of %s in % seconds', len_i, len_j, idx,
                              len(i_batches) - 1, time.time() - st)
             for jj in range(0, len_j, batch_size):
                 istart = ii
@@ -854,7 +854,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
                 jend = min(len_j, jj + batch_size)
                 res[istart:iend, jstart:jend] = self.csim_multi_feature_knn(i[istart:iend], j[jstart:jend]).astype(
                     np.float32)
-        logging.info('[csim_multi_feature_knn_batched] DONE! %s by %s - %s of %s in % seconds', len_i, len_j,
+        logging.debug('[csim_multi_feature_knn_batched] DONE! %s by %s - %s of %s in % seconds', len_i, len_j,
                      len(i_batches) - 1,
                      len(i_batches) - 1, time.time() - st)
         return res
@@ -872,18 +872,18 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         len_i = len(i)
         len_j = len(j)
         s = torch.zeros((len_i, len_j), dtype=torch.float32)
-        logging.log_first_n(logging.INFO, 'csim_multi_feature_knn_torch(i=%s, j=%s)', 1, str(i), str(j))
-        logging.log_first_n(logging.INFO, 'len(self.dense_features)=%s', 1, len(self.dense_features))
-        logging.log_first_n(logging.INFO, 'len(self.dense_sums)=%s', 1, len(self.dense_sums))
-        logging.log_first_n(logging.INFO, 'len(self.dense_centroids)=%s', 1, len(self.dense_centroids))
+        logging.log_first_n(logging.DEBUG, 'csim_multi_feature_knn_torch(i=%s, j=%s)', 1, str(i), str(j))
+        logging.log_first_n(logging.DEBUG, 'len(self.dense_features)=%s', 1, len(self.dense_features))
+        logging.log_first_n(logging.DEBUG, 'len(self.dense_sums)=%s', 1, len(self.dense_sums))
+        logging.log_first_n(logging.DEBUG, 'len(self.dense_centroids)=%s', 1, len(self.dense_centroids))
 
-        logging.log_first_n(logging.INFO, 'len(self.sparse_features)=%s', 1, len(self.sparse_features))
-        logging.log_first_n(logging.INFO, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
-        logging.log_first_n(logging.INFO, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
+        logging.log_first_n(logging.DEBUG, 'len(self.sparse_features)=%s', 1, len(self.sparse_features))
+        logging.log_first_n(logging.DEBUG, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
+        logging.log_first_n(logging.DEBUG, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
 
         for idx in range(len(self.dense_features)):
-            logging.log_first_n(logging.INFO, 'idx=%s', 10, idx)
-            logging.log_first_n(logging.INFO, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
+            logging.log_first_n(logging.DEBUG, 'idx=%s', 10, idx)
+            logging.log_first_n(logging.DEBUG, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
             w, b = self.model.weight_for(self.dense_features[idx][0])
             rhs = self.dense_point_features[idx][j]  # Grab the original feature matrix for j
             if self.dense_features[idx][4] == FeatCalc.L2:
@@ -923,7 +923,7 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         s = torch.zeros(len(i), dtype=torch.float32)
         for idx in range(len(self.dense_features)):
             w, b = self.model.weight_for(self.dense_features[idx][0])
-            logging.log_first_n(logging.INFO, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape),
+            logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape),
                                 str(self.dense_centroids[idx][j].shape))
             if self.dense_features[idx][4] == FeatCalc.L2:
                 feat_score = w * self.p_l2dist_feature_dense(idx, i, j)
