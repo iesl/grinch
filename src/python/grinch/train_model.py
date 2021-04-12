@@ -20,7 +20,6 @@ import numpy as np
 import torch
 import torch.nn
 import torch.nn.functional as F
-import wandb
 from absl import logging
 from sklearn.cluster import MiniBatchKMeans
 from tqdm import tqdm
@@ -168,7 +167,7 @@ class Trainer(object):
                 self.opt.step()
                 logging.log_every_n(logging.INFO, 'train loss: loss %s @ batch %s', 100, loss.detach().cpu().numpy(), i)
                 if self.global_step % 100 == 0:
-                    wandb.log({'train_loss': loss.detach().numpy(), 'global_step': self.global_step})
+                    # wandb.log({'train_loss': loss.detach().numpy(), 'global_step': self.global_step})
                     self.print_model_weights()
                     self.print_small_examples()
                 if self.global_step > 0 and self.global_step % self.dev_every == 0 and self.dev_data is not None:
