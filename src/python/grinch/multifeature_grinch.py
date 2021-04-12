@@ -150,12 +150,12 @@ class MultiFeatureGrinch(Grinch):
         return num_points, prev_num_points
 
     def add_pt(self, i):
-        logging.log_every_n(logging.debug, 'Adding point %s', 1000, i)
+        logging.log_every_n(logging.DEBUG, 'Adding point %s', 1000, i)
         for idx, mat in enumerate(self.dense_point_features):
-            # logging.log_every_n(logging.debug, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            # logging.log_every_n(logging.DEBUG, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat[i].copy()
         for idx, mat in enumerate(self.sparse_point_features):
-            # logging.log_every_n(logging.debug, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            # logging.log_every_n(logging.DEBUG, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             self.sparse_sums[idx][i] = mat[i].copy()
         self.num_descendants[i] = 1
         self.point_counter += 1
@@ -172,13 +172,13 @@ class MultiFeatureGrinch(Grinch):
         :return:
         """
         self.init_features()
-        logging.log_every_n(logging.debug, 'Adding %s points', 1000, len(i))
+        logging.log_every_n(logging.DEBUG, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
-            logging.log_every_n(logging.debug, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            logging.log_every_n(logging.DEBUG, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat[i]
             self.dense_centroids[idx][i] = mat[i]
         for idx, mat in enumerate(self.sparse_point_features):
-            logging.log_every_n(logging.debug, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            logging.log_every_n(logging.DEBUG, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             for ii in i:
                 self.sparse_sums[idx][ii] = mat[ii]
                 self.sparse_centroids[idx][ii] = mat[ii]
@@ -209,7 +209,7 @@ class MultiFeatureGrinch(Grinch):
                 return id_map[scipy_id]
         for i in range(Z.shape[0]):
             if should_log:
-                logging.log_every_n(logging.debug, 'from scipy z, processed %s of %s', 1000, i, Z.shape[0])
+                logging.log_every_n(logging.DEBUG, 'from scipy z, processed %s of %s', 1000, i, Z.shape[0])
             internal_id = get_id(i + self.num_points)
             self.parent[get_id(Z[i, 0].astype(np.int32))] = internal_id
             self.parent[get_id(Z[i, 1].astype(np.int32))] = internal_id
