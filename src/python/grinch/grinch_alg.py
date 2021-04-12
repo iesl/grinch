@@ -61,6 +61,7 @@ class Grinch(object):
         self.num_descendants = -1 * np.ones(self.max_nodes, dtype=np.float32)
         self.rotate_cap = rotate_cap
         self.graft_cap = graft_cap
+        self.perform_graft = True
 
         if norm == 'l2':
             logging.debug('Using centroid = l2')

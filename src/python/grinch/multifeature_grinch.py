@@ -424,7 +424,8 @@ class MultiFeatureGrinch(Grinch):
             while curr_update != -1:
                 self.updated_from_children(curr_update)
                 curr_update = self.get_parent(curr_update)
-            self.graft(parent)
+            if self.perform_graft:
+                self.graft(parent)
         t = time.time()
         logging.debug('[insert] finished insert(%s) in %s seconds', i, t - s)
 
