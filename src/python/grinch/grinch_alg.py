@@ -40,15 +40,12 @@ class Grinch(object):
         if dim is not None or points is not None:
             self.dim = dim if dim is not None else self.points.shape[1]
             self.centroids = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
-            self.radii = np.ones((self.max_nodes, 1), dtype=np.float32)
             self.sums = np.zeros((self.max_nodes, self.dim), dtype=np.float32)
 
         if init_points:
             self.points = np.zeros((self.num_points, self.dim), np.float32)
             logging.debug('[Grinch] points %s', str(self.points.shape))
 
-        self.ancs = [[] for _ in range(self.max_nodes)]
-        self.notes = [None for _ in range(self.max_nodes)]
         self.sibs = None
         self.children = [[] for _ in range(self.max_nodes)]
         self.descendants = [[] for _ in range(self.max_nodes)]
@@ -449,28 +446,6 @@ class Grinch(object):
         self.new_node[i] = False
         self.needs_update_model[i] = False
 
-    def update_radii(self, i, use_tqdm=True, metric='sqeuclidean'):
-        s = time.time()
-        needs_update = []
-        to_check = [i]
-        while to_check:
-            curr = to_check.pop(0)
-            if True:
-                needs_update.append(curr)
-                for c in self.get_children(curr):
-                    to_check.append(c)
-        self.time_in_update_walk += time.time() - s
-        if use_tqdm:
-            for j in tqdm(range(len(needs_update)-1,-1,-1), desc='FindRadii'):
-                self.single_update_radii(needs_update[j], metric)
-        else:
-            for j in range(len(needs_update)-1,-1,-1):
-                self.single_update_radii(needs_update[j], metric)
-        self.time_in_update += time.time() - s
-
-    def single_update_radii(self, i, metric):
-        raise Exception('currently not available')
-
     def node_from_nodes(self, n1, n2):
         logging.debug('creating new node from nodes %s and %s', n1, n2)
         new_node_id = self.next_node_id
@@ -493,8 +468,58 @@ class Grinch(object):
             self.grow_centroids_and_sums(new_max_nodes)
             self.max_nodes = new_max_nodes
 
+    def grow_points_if_necessary(self):
+        if self.point_counter >= self.max_num_points:
+            new_max_num_points = 2*self.max_num_points
+            logging.info('new num points %s', new_max_num_points)
+            offset = new_max_num_points - self.max_num_points
+            # grow internals if necessary
+            if offset + self.next_node_id >= self.max_nodes:
+                new_max_nodes = 2 * self.max_nodes
+                logging.debug('new max nodes %s', new_max_nodes)
+                self.grow_nodes(new_max_nodes)
+                self.grow_centroids_and_sums(new_max_nodes)
+                self.max_nodes = new_max_nodes
+            # re-map the internals
+            self.remap_node(offset)
+            self.remap_centroids_and_sums(offset)
+            self.max_num_points = new_max_num_points
+            self.next_node_id = self.next_node_id + offset
+
+    def remap_node(self, parent_offset):
+        for i in range(self.max_nodes-1, self.max_num_points+parent_offset-1, -1):
+            self.children[i] = [c if c <= self.point_counter else c+ parent_offset for c in self.children[i-parent_offset]]
+            self.descendants[i] = self.descendants[i-parent_offset]
+            self.scores[i] = self.scores[i-parent_offset]
+            self.needs_update_model[i] = self.needs_update_model[i-parent_offset]
+            self.new_node[i] = self.new_node[i-parent_offset]
+            self.needs_update_desc[i] = self.needs_update_desc[i-parent_offset]
+            self.parent[i] = self.parent[i-parent_offset] + parent_offset if self.parent[i-parent_offset] >=0 else  self.parent[i-parent_offset]
+            self.num_descendants[i] = self.num_descendants[i-parent_offset]
+
+        for i in range(0, self.point_counter, 1):
+            self.parent[i] = self.parent[i] + parent_offset if self.parent[i] >=0 else  self.parent[i]
+
+        for i in range(self.max_num_points+parent_offset-1, self.point_counter-1, -1):
+            self.children[i].clear()
+            self.descendants[i].clear()
+            self.scores[i] = -np.Inf
+            self.new_node[i] = False
+            self.needs_update_desc[i] = False
+            self.needs_update_model[i] = False
+            self.parent[i] = -1
+            self.num_descendants[i] = 1
+
+    def remap_centroids_and_sums(self, parent_offset):
+        for i in range(self.max_nodes-1, self.max_num_points+parent_offset-1, -1):
+            self.centroids[i] = self.centroids[i - parent_offset]
+            self.sums[i] = self.centroids[i - parent_offset]
+
+        for i in range(self.max_num_points+parent_offset-1, self.point_counter-1, -1):
+            self.centroids[i] *= 0
+            self.sums[i] *= 0
+
     def grow_nodes(self, new_max_nodes):
-        self.ancs.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
         self.sibs = None
         self.children.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
         self.descendants.extend([[] for _ in range(new_max_nodes-self.max_nodes)])
@@ -507,7 +532,6 @@ class Grinch(object):
 
     def grow_centroids_and_sums(self, new_max_nodes):
         self.centroids = np.vstack([self.centroids, np.zeros((new_max_nodes-self.max_nodes, self.dim), dtype=np.float32)])
-        self.radii = np.vstack([self.radii, np.ones((new_max_nodes-self.max_nodes, 1), dtype=np.float32)])
         self.sums = np.vstack([self.sums, np.zeros((new_max_nodes-self.max_nodes, self.dim), dtype=np.float32)])
 
     def add_pt(self, i):
@@ -532,6 +556,7 @@ class Grinch(object):
         if self.point_counter == 0:
             self.add_pt(i)
         else:
+            self.grow_points_if_necessary()
             i_vec = np.expand_dims(self.points[i], 0)
             dists, nns = self.cknn(i_vec, self.k, None, None)
             self.add_pt(i)

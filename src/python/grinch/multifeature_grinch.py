@@ -240,6 +240,55 @@ class MultiFeatureGrinch(Grinch):
         new_sf2 = existing[1].extend(to_append2)
         return new_sf1, new_sf2
 
+    def remap_dense_feature(self, existing, parent_offset):
+        for i in range(self.max_nodes-1, self.max_num_points+parent_offset-1, -1):
+            existing[0][i] = existing[0][i - parent_offset]
+            existing[1][i] = existing[1][i - parent_offset]
+
+        for i in range(self.max_num_points+parent_offset-1, self.point_counter-1, -1):
+            existing[0][i] *= 0
+            existing[1][i] *= 0
+
+    def remap_sparse_feature(self, existing, parent_offset):
+        for i in range(self.max_nodes-1, self.max_num_points+parent_offset-1, -1):
+            existing[0][i] = existing[0][i - parent_offset]
+            existing[1][i] = existing[1][i - parent_offset]
+
+        for i in range(self.max_num_points+parent_offset-1, self.point_counter-1, -1):
+            existing[0][i] = []
+            existing[1][i] = []
+
+    def remap_features(self, parent_offset):
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+                         str(feat_mat.shape))
+            assert self.dense_feature_id[fn] == idx
+            self.remap_dense_feature([self.dense_centroids[idx], self.dense_sums[idx]], parent_offset)
+
+        for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
+            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+                         str(feat_mat.shape))
+            assert self.sparse_feature_id[fn] == idx
+            self.remap_sparse_feature([self.sparse_centroids[idx], self.sparse_sums[idx]], parent_offset)
+
+    def grow_points_if_necessary(self):
+        if self.point_counter >= self.max_num_points:
+            new_max_num_points = 2*self.max_num_points
+            logging.info('new num points %s', new_max_num_points)
+            offset = new_max_num_points - self.max_num_points
+            # grow internals if necessary
+            if offset + self.next_node_id >= self.max_nodes:
+                new_max_nodes = 2 * self.max_nodes
+                logging.debug('new max nodes %s', new_max_nodes)
+                self.grow_nodes(new_max_nodes)
+                self.grow_centroids_and_sums(new_max_nodes)
+                self.max_nodes = new_max_nodes
+            # re-map the internals
+            self.remap_node(offset)
+            self.remap_features(offset)
+            self.max_num_points = new_max_num_points
+            self.next_node_id = self.next_node_id + offset
+
     def grow_features(self, new_max_nodes):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
             logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
