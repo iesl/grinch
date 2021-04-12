@@ -37,8 +37,8 @@ class MultiFeatureGrinch(Grinch):
         self.sparse_features = [(fn, is_dense, dim, feat_mat, feat_calc, centroid_type)
                                 for fn, is_dense, dim, feat_mat, feat_calc, centroid_type in features if not is_dense]
 
-        logging.info('%s dense features', len(self.dense_features))
-        logging.info('%s sparse features', len(self.sparse_features))
+        # logging.info('%s dense features', len(self.dense_features))
+        # logging.info('%s sparse features', len(self.sparse_features))
 
         self.dense_point_features = []
         self.sparse_point_features = []
@@ -84,35 +84,35 @@ class MultiFeatureGrinch(Grinch):
             self.pids.extend(pids)
 
         if self.num_points != self.point_counter:
-            logging.info('something is wrong, point_counter != num_points')
+            logging.debug('something is wrong, point_counter != num_points')
             self.point_counter = self.num_points
 
-        logging.info('[update_and_insert] starting now.....')
+        logging.debug('[update_and_insert] starting now.....')
         s = time.time()
 
-        logging.info('max_num_points %s | current num_points %s', self.max_num_points, self.num_points)
+        logging.debug('max_num_points %s | current num_points %s', self.max_num_points, self.num_points)
         num_points, prev_num_points = self.update_features(i_features)
 
         if self.points_set is False:
-            logging.info('grinch points not set, setting now for all points.....')
+            logging.debug('grinch points not set, setting now for all points.....')
             self.set_points(np.arange(self.num_points))
 
         for idx in range(len(self.dense_point_features)):
-            logging.info('dense_point_features %s', str(self.dense_point_features[idx].shape))
-            logging.info('dense_sums %s', str(self.dense_sums[idx].shape))
-            logging.info('dense_centroids %s', str(self.dense_centroids[idx].shape))
+            logging.debug('dense_point_features %s', str(self.dense_point_features[idx].shape))
+            logging.debug('dense_sums %s', str(self.dense_sums[idx].shape))
+            logging.debug('dense_centroids %s', str(self.dense_centroids[idx].shape))
 
         for idx in range(len(self.sparse_point_features)):
-            logging.info('sparse_point_features %s', str(self.sparse_point_features[idx].shape))
-            logging.info('sparse_sums %s', str(len(self.sparse_sums[idx])))
-            logging.info('sparse_centroids %s', str(len(self.sparse_centroids[idx])))
+            logging.debug('sparse_point_features %s', str(self.sparse_point_features[idx].shape))
+            logging.debug('sparse_sums %s', str(len(self.sparse_sums[idx])))
+            logging.debug('sparse_centroids %s', str(len(self.sparse_centroids[idx])))
 
-        logging.info('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points, num_points)
+        logging.debug('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points, num_points)
         for i in range(prev_num_points, prev_num_points + num_points):
-            logging.info('[update_and_insert] inserting %s - elapsed %s', i, time.time() - s)
+            logging.debug('[update_and_insert] inserting %s - elapsed %s', i, time.time() - s)
             self.insert(i)
             self.num_points += 1
-        logging.info('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points,
+        logging.debug('max_num_points %s | current num_points %s | adding %s', self.max_num_points, self.num_points,
                      num_points)
         logging.debug('[update_and_insert] starting now.....done! Elapsed %s', time.time() - s)
 
