@@ -174,11 +174,11 @@ class MultiFeatureGrinch(Grinch):
         self.init_features()
         logging.log_every_n(logging.DEBUG, 'Adding %s points', 1000, len(i))
         for idx, mat in enumerate(self.dense_point_features):
-            logging.log_every_n(logging.DEBUG, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
+            # logging.log_every_n(logging.DEBUG, 'Adding point %s - dense_point_features %s -> shape %s', 1000, i, idx, str(mat[i].shape))
             self.dense_sums[idx][i] = mat[i]
             self.dense_centroids[idx][i] = mat[i]
         for idx, mat in enumerate(self.sparse_point_features):
-            logging.log_every_n(logging.DEBUG, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
+            # logging.log_every_n(logging.DEBUG, 'Adding point %s - sparse_point_features %s -> shape %s %s', 1000, i, idx, str(mat[i].shape), type(mat))
             for ii in i:
                 self.sparse_sums[idx][ii] = mat[ii]
                 self.sparse_centroids[idx][ii] = mat[ii]
@@ -389,8 +389,8 @@ class MultiFeatureGrinch(Grinch):
                 self.dense_compute_centroid_binary(idx, i)
             elif self.dense_features[idx][5] == CentroidType.NO_NORM:
                 self.dense_compute_centroid_no_norm(idx, i)
-            logging.log_first_n(logging.DEBUG, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
-                                str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx].shape))
+            # logging.log_first_n(logging.DEBUG, 'self.dense_centroids[%s][%s].shape=%s, %s', 10, idx, i,
+            #                     str(self.dense_centroids[idx][i].shape), str(self.dense_centroids[idx].shape))
         for idx in range(len(self.sparse_features)):
             if update_sums:
                 assert len(self.children[i]) == 2
@@ -402,8 +402,8 @@ class MultiFeatureGrinch(Grinch):
                 self.sparse_compute_centroid_binary(idx, i)
             elif self.sparse_features[idx][5] == CentroidType.NO_NORM:
                 self.sparse_compute_centroid_no_norm(idx, i)
-            logging.log_first_n(logging.DEBUG, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
-                                str(self.sparse_centroids[idx][i].shape))
+            # logging.log_first_n(logging.DEBUG, 'self.sparse_centroids[%s][%s].shape=%s', 10, idx, i,
+            #                     str(self.sparse_centroids[idx][i].shape))
 
     def dense_compute_centroid_l2_norm(self, idx, i):
         self.dense_compute_centroid_no_norm(idx, i)
@@ -685,14 +685,14 @@ class MultiFeatureGrinch(Grinch):
         # import pdb; pdb.set_trace()
         s = 0
         for idx in range(len(self.dense_centroids)):
-            logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx,
-                                str(self.dense_centroids[idx][None, i].shape),
-                                str(self.dense_centroids[idx][None, j].shape))
+            # logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx,
+            #                     str(self.dense_centroids[idx][None, i].shape),
+            #                     str(self.dense_centroids[idx][None, j].shape))
             feat_score = self.dense_centroids[idx][None, i] @ self.dense_centroids[idx][None, j].T
             s += feat_score
         for idx in range(len(self.sparse_centroids)):
-            logging.log_first_n(logging.DEBUG, 'sparse[%s] - %s @ %s.T', 10, idx,
-                                str(self.sparse_centroids[idx][i].shape), str(self.sparse_centroids[idx][j].shape))
+            # logging.log_first_n(logging.DEBUG, 'sparse[%s] - %s @ %s.T', 10, idx,
+            #                     str(self.sparse_centroids[idx][i].shape), str(self.sparse_centroids[idx][j].shape))
             feat_score = (self.sparse_centroids[idx][i] @ self.sparse_centroids[idx][j].T).todense().A
             s += feat_score
         return s
@@ -923,18 +923,18 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         len_i = len(i)
         len_j = len(j)
         s = torch.zeros((len_i, len_j), dtype=torch.float32)
-        logging.log_first_n(logging.DEBUG, 'csim_multi_feature_knn_torch(i=%s, j=%s)', 1, str(i), str(j))
-        logging.log_first_n(logging.DEBUG, 'len(self.dense_features)=%s', 1, len(self.dense_features))
-        logging.log_first_n(logging.DEBUG, 'len(self.dense_sums)=%s', 1, len(self.dense_sums))
-        logging.log_first_n(logging.DEBUG, 'len(self.dense_centroids)=%s', 1, len(self.dense_centroids))
-
-        logging.log_first_n(logging.DEBUG, 'len(self.sparse_features)=%s', 1, len(self.sparse_features))
-        logging.log_first_n(logging.DEBUG, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
-        logging.log_first_n(logging.DEBUG, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
+        # logging.log_first_n(logging.DEBUG, 'csim_multi_feature_knn_torch(i=%s, j=%s)', 1, str(i), str(j))
+        # logging.log_first_n(logging.DEBUG, 'len(self.dense_features)=%s', 1, len(self.dense_features))
+        # logging.log_first_n(logging.DEBUG, 'len(self.dense_sums)=%s', 1, len(self.dense_sums))
+        # logging.log_first_n(logging.DEBUG, 'len(self.dense_centroids)=%s', 1, len(self.dense_centroids))
+        #
+        # logging.log_first_n(logging.DEBUG, 'len(self.sparse_features)=%s', 1, len(self.sparse_features))
+        # logging.log_first_n(logging.DEBUG, 'len(self.sparse_sums)=%s', 1, len(self.sparse_sums))
+        # logging.log_first_n(logging.DEBUG, 'len(self.sparse_centroids)=%s', 1, len(self.sparse_centroids))
 
         for idx in range(len(self.dense_features)):
-            logging.log_first_n(logging.DEBUG, 'idx=%s', 10, idx)
-            logging.log_first_n(logging.DEBUG, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
+            # logging.log_first_n(logging.DEBUG, 'idx=%s', 10, idx)
+            # logging.log_first_n(logging.DEBUG, 'self.dense_features[idx][0]=%s', 10, self.dense_features[idx][0])
             w, b = self.model.weight_for(self.dense_features[idx][0])
             rhs = self.dense_point_features[idx][j]  # Grab the original feature matrix for j
             if self.dense_features[idx][4] == FeatCalc.L2:
@@ -974,8 +974,8 @@ class WeightedMultiFeatureGrinch(MultiFeatureGrinch):
         s = torch.zeros(len(i), dtype=torch.float32)
         for idx in range(len(self.dense_features)):
             w, b = self.model.weight_for(self.dense_features[idx][0])
-            logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape),
-                                str(self.dense_centroids[idx][j].shape))
+            # logging.log_first_n(logging.DEBUG, 'dense[%s] - %s @ %s.T', 10, idx, str(self.dense_centroids[idx][i].shape),
+            #                     str(self.dense_centroids[idx][j].shape))
             if self.dense_features[idx][4] == FeatCalc.L2:
                 feat_score = w * self.p_l2dist_feature_dense(idx, i, j)
             elif self.dense_features[idx][4] == FeatCalc.DOT:
