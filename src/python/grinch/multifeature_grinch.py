@@ -281,7 +281,7 @@ class MultiFeatureGrinch(Grinch):
                 new_max_nodes = 2 * self.max_nodes
                 logging.debug('new max nodes %s', new_max_nodes)
                 self.grow_nodes(new_max_nodes)
-                self.grow_centroids_and_sums(new_max_nodes)
+                self.grow_features(new_max_nodes)
                 self.max_nodes = new_max_nodes
             # re-map the internals
             self.remap_node(offset)
