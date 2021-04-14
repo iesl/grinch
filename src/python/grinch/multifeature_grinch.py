@@ -330,6 +330,10 @@ class MultiFeatureGrinch(Grinch):
         return [[] for _ in range(self.max_nodes)], [[] for _ in range(self.max_nodes)]
 
     def init_features(self):
+        self.init_dense_features()
+        self.init_sparse_features()
+
+    def init_dense_features(self):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.dense_features):
             logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
                          str(feat_mat.shape))
@@ -343,9 +347,10 @@ class MultiFeatureGrinch(Grinch):
                 str(feat_mat.shape), idx, str(self.dense_centroids[idx].shape), idx,
                 str(self.dense_sums[idx].shape))
 
+    def init_sparse_features(self):
         for idx, (fn, is_dense, dim, feat_mat, _, _) in enumerate(self.sparse_features):
-            logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
-                         str(feat_mat.shape))
+            # logging.debug('Initialize feature - name=%s, dense=%s, dim=%s, mat=%s', fn, is_dense, dim,
+            #              str(feat_mat.shape))
             self.sparse_feature_id[fn] = idx
             c, s = self.init_sparse_feature(dim)
             self.sparse_centroids[idx] = s
@@ -456,6 +461,13 @@ class MultiFeatureGrinch(Grinch):
         if self.points_set is False:
             logging.debug('grinch points not set, setting now for all points.....')
             self.set_points(np.arange(self.num_points))
+        
+        if self.sparse_centroids is None or self.sparse_sums is None:
+            self.init_sparse_features()
+
+        if self.dense_centroids is None or self.dense_sums is None:
+            self.init_dense_features()
+
         s = time.time()
         logging.debug('[insert] insert(%s) pc=%s', i, self.point_counter)
         # first point
