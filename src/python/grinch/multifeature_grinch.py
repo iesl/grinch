@@ -236,9 +236,9 @@ class MultiFeatureGrinch(Grinch):
     def grow_sparse_feature(self, new_max_nodes, existing):
         to_append1 = [[] for _ in range(new_max_nodes - self.max_nodes)]
         to_append2 = [[] for _ in range(new_max_nodes - self.max_nodes)]
-        new_sf1 = existing[0].extend(to_append1)
-        new_sf2 = existing[1].extend(to_append2)
-        return new_sf1, new_sf2
+        existing[0].extend(to_append1)
+        existing[1].extend(to_append2)
+        return existing[0], existing[1]
 
     def remap_dense_feature(self, existing, parent_offset):
         for i in range(self.max_nodes-1, self.max_num_points+parent_offset-1, -1):
