@@ -43,6 +43,7 @@ class FeatCalc(Enum):
     L2_gt_one = 3
     NO_MATCH = 4
     LOCATION = 5
+    STRING = 6
 
 
 class CentroidType(Enum):
