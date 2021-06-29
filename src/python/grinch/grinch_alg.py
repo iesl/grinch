@@ -549,7 +549,9 @@ class Grinch(object):
                 self.stats_string()
             self.insert(i)
 
-    def insert(self, i):
+    def insert(self, i, i_vec=None):
+        if i_vec is not None:
+            self.points[i] = i_vec
         s = time.time()
         logging.debug('[insert] insert(%s)', i)
         # first point
