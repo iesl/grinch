@@ -95,6 +95,7 @@ class Agglom(object):
         logging.info('Finished batched similarities!')
         st_prep = time.time()
         pos_sim = np.maximum(sims, self.min_allowable_sim) - np.minimum(0.0, self.min_allowable_sim)
+        del sims
         dists = 1 / (1 + pos_sim)
         del pos_sim
         dists = (dists + dists.T) / 2.0
