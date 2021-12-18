@@ -120,7 +120,7 @@ class Agglom(object):
         should_log = len_i > 3 * batch_size
         if should_log:
             logging.info('[csim_multi_feature_knn_batched] %s by %s', len_i, len_j)
-        res = np.zeros((len_i, len_j), dtype=np.float32)
+        res = np.zeros((len_i, len_j), dtype=np.float16)
         i_batches = [x for x in range(0, len_i, batch_size)]
         st = time.time()
         for idx, ii in enumerate(i_batches):
@@ -133,7 +133,7 @@ class Agglom(object):
                 iend = min(len_i, ii + batch_size)
                 jend = min(len_j, jj + batch_size)
                 res[istart:iend, jstart:jend] = self.csim_multi_feature_knn(i[istart:iend], j[jstart:jend]).astype(
-                    np.float32)
+                    np.float16)
         logging.info('[csim_multi_feature_knn_batched] DONE! %s by %s - %s of %s in % seconds', len_i, len_j,
                      len(i_batches) - 1,
                      len(i_batches) - 1, time.time() - st)
@@ -145,7 +145,7 @@ class Agglom(object):
     def csim_multi_feature_knn_torch(self, i, j, record_dict=None):
         len_i = len(i)
         len_j = len(j)
-        s = torch.zeros((len_i, len_j), dtype=torch.float32)
+        s = torch.zeros((len_i, len_j), dtype=torch.float16)
         for idx in range(len(self.dense_features)):
             w, b = self.model.weight_for(self.dense_features[idx][0])
             lhs = self.dense_features[idx][3][i]  # Grab the original feature matrix for i
@@ -186,7 +186,7 @@ class Agglom(object):
 
     def pw_sim_torch(self, i, j, record_dict=None):
         assert len(i) == len(j)
-        s = torch.zeros(len(i), dtype=torch.float32)
+        s = torch.zeros(len(i), dtype=torch.float16)
         for idx in range(len(self.dense_features)):
             w, b = self.model.weight_for(self.dense_features[idx][0])
             lhs = self.dense_features[idx][3][i]  # Grab the original feature matrix for i
@@ -227,36 +227,36 @@ class Agglom(object):
 
     def p_l2dist_feature_dense(self, idx, c_i, c_j):
         res = paired_distances(c_i, c_j, metric='euclidean') ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_feature_dense(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_feature_dense_knn(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def p_l2dist_gt_one_feature_dense(self, idx, c_i, c_j):
         res = (paired_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2) > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def p_no_match_feature_dense(self, idx, c_i, c_j):
         res = np.squeeze(np.logical_and(np.logical_and(c_i != c_j, c_i != -1), c_j != -1), 1)
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_gt_one_feature_dense(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_gt_one_feature_dense_knn(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_no_match_feature_dense_knn(self, idx, c_i, c_j):
         c_jT = c_j.T
         res = np.logical_and(np.logical_and(c_i != c_jT, c_i != -1), c_jT != -1)
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l1_dense_knn(self, idx, c_i, c_j):
         return cdist(c_i, c_j, metric='cityblock')
@@ -266,49 +266,49 @@ class Agglom(object):
         return res
 
     def p_dot_feature_dense(self, idx, c_i, c_j):
-        res = np.sum(c_i * c_j, axis=1).astype(np.float32)
-        return torch.from_numpy(res.astype(np.float32))
+        res = np.sum(c_i * c_j, axis=1).astype(np.float16)
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_dot_feature_dense(self, idx, c_i, c_j):
         res = np.matmul(c_i, c_j.T)
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_dot_feature_dense_knn(self, idx, c_i, c_j):
         res = np.matmul(c_i, c_j.T)
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def p_l2dist_feature_sparse(self, idx, c_i, c_j):
         res = paired_distances(c_i, c_j, metric='euclidean') ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_feature_sparse(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_feature_sparse_knn(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def p_l2dist_gt_one_feature_sparse(self, idx, c_i, c_j):
         res = paired_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_gt_one_feature_sparse(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_l2dist_gt_one_feature_sparse_knn(self, idx, c_i, c_j):
         res = pairwise_distances(c_i, c_j, metric='euclidean', n_jobs=-1) ** 2 > 1
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def p_dot_feature_sparse(self, idx, c_i, c_j):
-        res = c_i.multiply(c_j).sum(axis=1).A.astype(np.float32)
-        return torch.from_numpy(res.astype(np.float32))
+        res = c_i.multiply(c_j).sum(axis=1).A.astype(np.float16)
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_dot_feature_sparse(self, idx, c_i, c_j):
         res = (c_i @ c_j.T).todense().A
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
 
     def c_dot_feature_sparse_knn(self, idx, c_i, c_j):
         res = (c_i @ c_j.T).todense().A
-        return torch.from_numpy(res.astype(np.float32))
+        return torch.from_numpy(res.astype(np.float16))
