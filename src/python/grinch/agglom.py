@@ -90,23 +90,24 @@ class Agglom(object):
         """Run HAC inference."""
         st_sims = time.time()
         sims = self.csim_multi_feature_knn_batched(np.arange(self.num_points), np.arange(self.num_points))
-        self.sims = sims
         en_sims = time.time()
         logging.info('Time to compute sims: %s', en_sims - st_sims)
         logging.info('Finished batched similarities!')
         st_prep = time.time()
         pos_sim = np.maximum(sims, self.min_allowable_sim) - np.minimum(0.0, self.min_allowable_sim)
+        del sims
         dists = 1 / (1 + pos_sim)
+        del pos_sim
         dists = (dists + dists.T) / 2.0
         np.fill_diagonal(dists, 0.0)
         dists = squareform(dists)
-        self.dists = dists
         en_prep = time.time()
         logging.info('Time to compute sims: %s', en_prep - st_prep)
         logging.info('Finished preparing distances!')
         logging.info('Running hac')
         st_linkage = time.time()
         Z = linkage(dists, method='average')
+        del dists
         self.Z = Z
         en_linkage = time.time()
         logging.info('Time to run HAC: %s', en_linkage - st_linkage)
@@ -311,3 +312,4 @@ class Agglom(object):
     def c_dot_feature_sparse_knn(self, idx, c_i, c_j):
         res = (c_i @ c_j.T).todense().A
         return torch.from_numpy(res.astype(np.float32))
+
